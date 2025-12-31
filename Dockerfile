@@ -1,5 +1,8 @@
 FROM oven/bun:alpine AS base
-RUN apk add --no-cache libc6-compat
+RUN apk add --no-cache libc6-compat python3 python3-pip sqlite3 \ 
+  python3-dev python3-babel python3-venv python-is-python3 \
+  uwsgi uwsgi-plugin-python3 \
+  git build-essential libxslt-dev zlib1g-dev libffi-dev libssl-dev
 RUN apk update
 
 # Install dependencies only when needed
