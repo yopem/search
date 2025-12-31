@@ -6,6 +6,7 @@ import Logo from "@/components/logo"
 import { SearchAutocomplete } from "@/components/search/search-autocomplete"
 import ThemeSwitcher from "@/components/theme/theme-switcher"
 import { Button } from "@/components/ui/button"
+import { Field } from "@/components/ui/field"
 
 export default function Home() {
   const [query, setQuery] = useState("")
@@ -31,13 +32,13 @@ export default function Home() {
       </div>
 
       <div className="flex w-full max-w-2xl gap-2">
-        <div className="flex-1">
+        <Field className="flex-1">
           <SearchAutocomplete
             value={query}
             onChange={setQuery}
             onSubmit={handleSubmit}
           />
-        </div>
+        </Field>
         <Button onClick={handleSubmit}>Search</Button>
       </div>
     </div>
