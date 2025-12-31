@@ -7,13 +7,15 @@ import { Search } from "lucide-react"
 
 import { ImageResultCard } from "@/components/search/image-result-card"
 import { NewsResultCard } from "@/components/search/news-result-card"
+import { SearchAutocomplete } from "@/components/search/search-autocomplete"
 import { SearchEmpty } from "@/components/search/search-empty"
 import { SearchError } from "@/components/search/search-error"
+import { SearchHistory } from "@/components/search/search-history"
 import { SearchSkeleton } from "@/components/search/search-skeleton"
 import { VideoResultCard } from "@/components/search/video-result-card"
 import { WebResultCard } from "@/components/search/web-result-card"
+import ThemeSwitcher from "@/components/theme/theme-switcher"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { queryApi } from "@/lib/orpc/query"
 
@@ -60,8 +62,7 @@ export function SearchPageClient() {
 
   const shouldShowResults = !!initialQuery
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleSearch = () => {
     if (!query.trim()) return
 
     const params = new URLSearchParams()
@@ -96,16 +97,23 @@ export function SearchPageClient() {
 
   return (
     <div className="container mx-auto max-w-7xl px-4 py-8">
-      <form onSubmit={handleSearch} className="mb-8">
+      <div className="absolute top-4 right-4">
+        <ThemeSwitcher />
+      </div>
+
+      <form
+        onSubmit={(e) => {
+          e.preventDefault()
+          handleSearch()
+        }}
+        className="mb-8"
+      >
         <div className="flex gap-2">
-          <div className="relative flex-1">
-            <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
-            <Input
-              type="search"
-              placeholder="Search the web..."
+          <div className="flex-1">
+            <SearchAutocomplete
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              className="pl-10"
+              onChange={setQuery}
+              onSubmit={handleSearch}
             />
           </div>
           <Button type="submit">Search</Button>
@@ -113,12 +121,16 @@ export function SearchPageClient() {
       </form>
 
       {!initialQuery ? (
-        <div className="flex flex-col items-center justify-center py-12 text-center">
-          <Search className="text-muted-foreground mb-4 h-16 w-16" />
-          <h2 className="mb-2 text-2xl font-semibold">Start Searching</h2>
-          <p className="text-muted-foreground">
-            Enter a query to search the web
-          </p>
+        <div className="space-y-8">
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <Search className="text-muted-foreground mb-4 h-16 w-16" />
+            <h2 className="mb-2 text-2xl font-semibold">Start Searching</h2>
+            <p className="text-muted-foreground">
+              Enter a query to search the web
+            </p>
+          </div>
+
+          <SearchHistory />
         </div>
       ) : (
         <Tabs value={category} onValueChange={handleCategoryChange}>

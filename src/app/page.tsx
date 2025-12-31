@@ -1,12 +1,27 @@
-import { Search } from "lucide-react"
+"use client"
+
+import { useState } from "react"
 
 import Logo from "@/components/logo"
+import { SearchAutocomplete } from "@/components/search/search-autocomplete"
+import ThemeSwitcher from "@/components/theme/theme-switcher"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 
 export default function Home() {
+  const [query, setQuery] = useState("")
+
+  const handleSubmit = () => {
+    if (query.trim()) {
+      window.location.href = `/search?q=${encodeURIComponent(query)}`
+    }
+  }
+
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-8 p-4">
+      <div className="absolute top-4 right-4">
+        <ThemeSwitcher />
+      </div>
+
       <div className="flex flex-col items-center gap-4">
         <Logo className="h-24 w-auto" />
         <h1 className="text-4xl font-semibold">Yopem</h1>
@@ -15,24 +30,16 @@ export default function Home() {
         </p>
       </div>
 
-      <form
-        action="/search"
-        method="get"
-        className="flex w-full max-w-2xl gap-2"
-      >
-        <div className="relative flex-1">
-          <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
-          <Input
-            type="text"
-            name="q"
-            placeholder="Search the web..."
-            className="pl-10"
-            autoFocus
-            required
+      <div className="flex w-full max-w-2xl gap-2">
+        <div className="flex-1">
+          <SearchAutocomplete
+            value={query}
+            onChange={setQuery}
+            onSubmit={handleSubmit}
           />
         </div>
-        <Button type="submit">Search</Button>
-      </form>
+        <Button onClick={handleSubmit}>Search</Button>
+      </div>
     </div>
   )
 }
