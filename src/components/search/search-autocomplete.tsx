@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { Search } from "lucide-react"
 
@@ -22,12 +22,20 @@ export function SearchAutocomplete({
 }: SearchAutocompleteProps) {
   const [isOpen, setIsOpen] = useState(false)
 
-  const { data: suggestions = [] } = useQuery({
+  const { data: suggestions = [], isFetching } = useQuery({
     ...queryApi.search.autocomplete.queryOptions({
       input: { query: value },
     }),
     enabled: value.length > 1,
   })
+
+  useEffect(() => {
+    if (value.length > 1 && suggestions.length > 0 && !isFetching) {
+      setIsOpen(true)
+    } else if (value.length <= 1) {
+      setIsOpen(false)
+    }
+  }, [value, suggestions, isFetching])
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
@@ -50,7 +58,6 @@ export function SearchAutocomplete({
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onChange(e.target.value)
-    setIsOpen(e.target.value.length > 1)
   }
 
   const handleBlur = () => {
@@ -69,7 +76,9 @@ export function SearchAutocomplete({
           value={value}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
-          onFocus={() => value.length > 1 && setIsOpen(true)}
+          onFocus={() =>
+            value.length > 1 && suggestions.length > 0 && setIsOpen(true)
+          }
           onBlur={handleBlur}
           className="pl-10"
           autoComplete="off"

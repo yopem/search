@@ -105,14 +105,14 @@ export const searchRouter = {
           q: query,
         })
 
-        const response = await fetch(`${searxngUrl}/autocomplete?${params}`)
+        const response = await fetch(`${searxngUrl}/autocompleter?${params}`)
 
         if (!response.ok) {
           return []
         }
 
-        const suggestions = (await response.json()) as string[]
-        return suggestions
+        const data = (await response.json()) as [string, string[]]
+        return data[1]
       } catch {
         return []
       }
