@@ -4,6 +4,7 @@ const config: NextConfig = {
   experimental: {
     turbopackFileSystemCacheForDev: true,
   },
+  serverExternalPackages: ["pg", "pg-pool", "pg-native"],
   reactCompiler: true,
   reactStrictMode: true,
   // cacheComponents: true,
@@ -22,11 +23,11 @@ const config: NextConfig = {
     remotePatterns: [
       {
         protocol: "http",
-        hostname: "*.yopem.com",
+        hostname: "*",
       },
       {
         protocol: "https",
-        hostname: "*.yopem.com",
+        hostname: "*",
       },
     ],
   },

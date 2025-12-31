@@ -1,0 +1,9 @@
+FROM searxng/searxng:latest
+
+COPY searxng/settings.yml /etc/searxng/settings.yml
+COPY searxng/limiter.toml /etc/searxng/limiter.toml
+COPY searxng/uwsgi.ini /etc/searxng/uwsgi.ini
+
+EXPOSE 3600
+
+CMD ["/usr/local/searxng/dockerfiles/docker-entrypoint.sh"]
