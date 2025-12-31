@@ -16,6 +16,7 @@ import { VideoResultCard } from "@/components/search/video-result-card"
 import { WebResultCard } from "@/components/search/web-result-card"
 import ThemeSwitcher from "@/components/theme/theme-switcher"
 import { Button } from "@/components/ui/button"
+import { Field } from "@/components/ui/field"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { queryApi } from "@/lib/orpc/query"
 
@@ -109,13 +110,13 @@ export function SearchPageClient() {
         className="mb-8"
       >
         <div className="flex gap-2">
-          <div className="flex-1">
+          <Field className="flex-1">
             <SearchAutocomplete
               value={query}
               onChange={setQuery}
               onSubmit={handleSearch}
             />
-          </div>
+          </Field>
           <Button type="submit">Search</Button>
         </div>
       </form>

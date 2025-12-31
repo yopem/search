@@ -1,16 +1,18 @@
 "use client"
 
 import { useState } from "react"
+import { useForm } from "@tanstack/react-form"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 
 import { Button } from "@/components/ui/button"
+import { Field, FieldError, FieldLabel } from "@/components/ui/field"
+import { Form } from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
 import type { SelectPost } from "@/lib/db/schema/post"
 import { clientApi } from "@/lib/orpc/client"
 
 const ExampleMutation = () => {
-  const [title, setTitle] = useState("")
-  const [description, setDescription] = useState("")
-  const [isSubmitting, setIsSubmitting] = useState(false)
   const [lastCreatedPost, setLastCreatedPost] = useState<SelectPost | null>(
     null,
   )
@@ -28,13 +30,10 @@ const ExampleMutation = () => {
     onSuccess: (data) => {
       void queryClient.invalidateQueries()
       setLastCreatedPost(data)
-      setTitle("")
-      setDescription("")
-      setIsSubmitting(false)
+      form.reset()
     },
     onError: (error) => {
       console.error("Failed to create post:", error)
-      setIsSubmitting(false)
     },
   })
 
@@ -60,17 +59,18 @@ const ExampleMutation = () => {
     },
   })
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (!title.trim()) return
-
-    setIsSubmitting(true)
-    createPostMutation.mutate({
-      title: title.trim(),
-      description: description.trim() || undefined,
-    })
-  }
+  const form = useForm({
+    defaultValues: {
+      title: "",
+      description: "",
+    },
+    onSubmit: ({ value }) => {
+      createPostMutation.mutate({
+        title: value.title,
+        description: value.description || undefined,
+      })
+    },
+  })
 
   const handleUpdateLastPost = () => {
     if (!lastCreatedPost) return
@@ -87,49 +87,70 @@ const ExampleMutation = () => {
       <div className="mx-auto max-w-md">
         <h2 className="mb-4 text-xl font-semibold">Create New Post</h2>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="title" className="mb-1 block text-sm font-medium">
-              Title *
-            </label>
-            <input
-              id="title"
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Enter post title..."
-              required
-              className="w-full rounded-md border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="description"
-              className="mb-1 block text-sm font-medium"
-            >
-              Description
-            </label>
-            <textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Enter post description (optional)..."
-              rows={3}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-            />
-          </div>
-
-          <Button
-            type="submit"
-            disabled={
-              !title.trim() || isSubmitting || createPostMutation.isPending
-            }
-            className="w-full"
+        <Form
+          onSubmit={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            void form.handleSubmit()
+          }}
+        >
+          <form.Field
+            name="title"
+            validators={{
+              onChange: ({ value }) =>
+                !value ? "Title is required" : undefined,
+            }}
           >
-            {createPostMutation.isPending ? "Creating..." : "Create Post"}
-          </Button>
-        </form>
+            {(field) => (
+              <Field>
+                <FieldLabel>Title *</FieldLabel>
+                <Input
+                  name={field.name}
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                  placeholder="Enter post title..."
+                  aria-invalid={field.state.meta.errors.length > 0}
+                />
+                <FieldError>{field.state.meta.errors.join(", ")}</FieldError>
+              </Field>
+            )}
+          </form.Field>
+
+          <form.Field name="description">
+            {(field) => (
+              <Field>
+                <FieldLabel>Description</FieldLabel>
+                <Textarea
+                  name={field.name}
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                  placeholder="Enter post description (optional)..."
+                  rows={3}
+                  aria-invalid={field.state.meta.errors.length > 0}
+                />
+                <FieldError>{field.state.meta.errors.join(", ")}</FieldError>
+              </Field>
+            )}
+          </form.Field>
+
+          <form.Subscribe
+            selector={(state) => [state.canSubmit, state.isSubmitting]}
+          >
+            {([canSubmit, isSubmitting]) => (
+              <Button
+                type="submit"
+                disabled={
+                  !canSubmit || isSubmitting || createPostMutation.isPending
+                }
+                className="w-full"
+              >
+                {createPostMutation.isPending ? "Creating..." : "Create Post"}
+              </Button>
+            )}
+          </form.Subscribe>
+        </Form>
 
         {/* Mutation Status */}
         <div className="mt-4 space-y-2">
