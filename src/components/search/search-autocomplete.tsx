@@ -11,7 +11,7 @@ import { queryApi } from "@/lib/orpc/query"
 interface SearchAutocompleteProps {
   value: string
   onChange: (value: string) => void
-  onSubmit: () => void
+  onSubmit: (value?: string) => void
   placeholder?: string
 }
 
@@ -42,7 +42,7 @@ const SearchAutocomplete = ({
 
   const debouncedValue = useDebounce(value, 300)
 
-  const { data: suggestions = [], isFetching } = useQuery({
+  const { data: suggestions = [] } = useQuery({
     ...queryApi.search.autocomplete.queryOptions({
       input: { query: debouncedValue },
     }),
@@ -55,13 +55,12 @@ const SearchAutocomplete = ({
     return suggestions.filter((s) => s.toLowerCase() !== value.toLowerCase())
   }, [suggestions, value])
 
+  // Close autocomplete when value becomes too short
   useEffect(() => {
-    if (value.length > 1 && filteredSuggestions.length > 0 && !isFetching) {
-      setIsOpen(true)
-    } else if (value.length <= 1) {
+    if (value.length <= 1) {
       setIsOpen(false)
     }
-  }, [value, filteredSuggestions, isFetching])
+  }, [value])
 
   useEffect(() => {
     return () => {
@@ -96,13 +95,20 @@ const SearchAutocomplete = ({
 
   const handleSelect = (suggestion: string) => {
     onChange(suggestion)
+    void queryClient.cancelQueries({
+      predicate: (query) =>
+        query.queryKey[0] === "search" && query.queryKey[1] === "autocomplete",
+    })
     setIsOpen(false)
-    setTimeout(() => handleSubmit(), 100)
+    onSubmit(suggestion)
   }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const sanitized = e.target.value.slice(0, 500)
     onChange(sanitized)
+    if (sanitized.length > 1) {
+      setIsOpen(true)
+    }
   }
 
   const handleBlur = () => {

@@ -163,6 +163,12 @@ const SearchInterface = ({
   const allResults = data?.pages.flatMap((page) => page.results) ?? []
 
   useEffect(() => {
+    if (mode === "results") {
+      setQuery(initialQuery)
+    }
+  }, [initialQuery, mode])
+
+  useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
@@ -204,8 +210,8 @@ const SearchInterface = ({
     return false
   }
 
-  const handleSearch = () => {
-    const trimmedQuery = query.trim()
+  const handleSearch = (searchQuery?: string) => {
+    const trimmedQuery = (searchQuery ?? query).trim()
 
     if (!trimmedQuery) return
 
