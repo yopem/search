@@ -1,8 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { useQuery } from "@tanstack/react-query"
+import { useInfiniteQuery } from "@tanstack/react-query"
+import { parseAsStringLiteral, useQueryState } from "nuqs"
 
 import Logo from "@/components/logo"
 import ImageResultCard from "@/components/search/image-result-card"
@@ -13,7 +14,7 @@ import SearchError from "@/components/search/search-error"
 import SearchSkeleton from "@/components/search/search-skeleton"
 import VideoResultCard from "@/components/search/video-result-card"
 import WebResultCard from "@/components/search/web-result-card"
-import { Button } from "@/components/ui/button"
+import { Spinner } from "@/components/ui/spinner"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { queryApi } from "@/lib/orpc/query"
 
@@ -38,29 +39,67 @@ interface SearchInterfaceProps {
 const SearchInterface = ({ mode }: SearchInterfaceProps) => {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const loadMoreRef = useRef<HTMLDivElement>(null)
 
   const initialQuery = mode === "results" ? (searchParams.get("q") ?? "") : ""
-  const initialCategory = (searchParams.get("category") ?? "general") as
-    | "general"
-    | "images"
-    | "videos"
-    | "news"
-  const initialPage = Number(searchParams.get("page")) || 1
 
   const [query, setQuery] = useState("")
-  const [category, setCategory] = useState(initialCategory)
-  const [page, setPage] = useState(initialPage)
 
-  const { data, isLoading, error, refetch } = useQuery({
-    ...queryApi.search.query.queryOptions({
-      input: {
+  const [category, setCategory] = useQueryState(
+    "category",
+    parseAsStringLiteral(["general", "images", "videos", "news"] as const)
+      .withDefault("general")
+      .withOptions({
+        shallow: false,
+      }),
+  )
+
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+    error,
+    refetch,
+  } = useInfiniteQuery(
+    queryApi.search.query.infiniteOptions({
+      input: (pageParam: number) => ({
         query: initialQuery || "placeholder",
         category,
-        page,
+        page: pageParam,
+      }),
+      initialPageParam: 1,
+      getNextPageParam: (lastPage, allPages) => {
+        return lastPage.results.length > 0 ? allPages.length + 1 : undefined
       },
+      enabled: mode === "results" && !!initialQuery,
     }),
-    enabled: mode === "results" && !!initialQuery,
-  })
+  )
+
+  const allResults = data?.pages.flatMap((page) => page.results) ?? []
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          void fetchNextPage()
+        }
+      },
+      { threshold: 0.1 },
+    )
+
+    const currentRef = loadMoreRef.current
+    if (currentRef) {
+      observer.observe(currentRef)
+    }
+
+    return () => {
+      if (currentRef) {
+        observer.unobserve(currentRef)
+      }
+    }
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage])
 
   const handleSearch = () => {
     if (!query.trim()) return
@@ -73,25 +112,7 @@ const SearchInterface = ({ mode }: SearchInterfaceProps) => {
   }
 
   const handleCategoryChange = (newCategory: string) => {
-    const cat = newCategory as "general" | "images" | "videos" | "news"
-    setCategory(cat)
-
-    const params = new URLSearchParams()
-    params.set("q", initialQuery)
-    params.set("category", cat)
-    params.set("page", "1")
-    router.push(`/search?${params.toString()}`)
-    setPage(1)
-  }
-
-  const handlePageChange = (newPage: number) => {
-    setPage(newPage)
-
-    const params = new URLSearchParams()
-    params.set("q", initialQuery)
-    params.set("category", category)
-    params.set("page", newPage.toString())
-    router.push(`/search?${params.toString()}`)
+    void setCategory(newCategory as "general" | "images" | "videos" | "news")
   }
 
   if (mode === "home") {
@@ -151,56 +172,87 @@ const SearchInterface = ({ mode }: SearchInterfaceProps) => {
 
           {isLoading && <SearchSkeleton />}
 
-          {!isLoading && !error && data && data.results.length === 0 && (
+          {!isLoading && !error && allResults.length === 0 && (
             <SearchEmpty query={initialQuery} />
           )}
 
-          {!isLoading && !error && data && data.results.length > 0 && (
+          {!isLoading && !error && allResults.length > 0 && (
             <>
-              <TabsContent value="general" className="space-y-4">
-                {data.results.map((result: SearchResult, index: number) => (
-                  <WebResultCard key={index} result={result} />
-                ))}
-              </TabsContent>
-
-              <TabsContent value="images">
-                <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-                  {data.results.map((result: SearchResult, index: number) => (
-                    <ImageResultCard key={index} result={result} />
+              <div
+                role="feed"
+                aria-busy={isFetchingNextPage}
+                aria-label={`Search results for ${initialQuery}`}
+              >
+                <TabsContent value="general" className="space-y-4">
+                  {allResults.map((result: SearchResult, index: number) => (
+                    <article
+                      key={index}
+                      aria-posinset={index + 1}
+                      aria-setsize={allResults.length}
+                    >
+                      <WebResultCard result={result} />
+                    </article>
                   ))}
-                </div>
-              </TabsContent>
+                </TabsContent>
 
-              <TabsContent value="videos" className="space-y-4">
-                {data.results.map((result: SearchResult, index: number) => (
-                  <VideoResultCard key={index} result={result} />
-                ))}
-              </TabsContent>
+                <TabsContent value="images">
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+                    {allResults.map((result: SearchResult, index: number) => (
+                      <ImageResultCard key={index} result={result} />
+                    ))}
+                  </div>
+                </TabsContent>
 
-              <TabsContent value="news" className="space-y-4">
-                {data.results.map((result: SearchResult, index: number) => (
-                  <NewsResultCard key={index} result={result} />
-                ))}
-              </TabsContent>
+                <TabsContent value="videos" className="space-y-4">
+                  {allResults.map((result: SearchResult, index: number) => (
+                    <article
+                      key={index}
+                      aria-posinset={index + 1}
+                      aria-setsize={allResults.length}
+                    >
+                      <VideoResultCard result={result} />
+                    </article>
+                  ))}
+                </TabsContent>
 
-              <div className="mt-8 flex items-center justify-center gap-2">
-                <Button
-                  variant="outline"
-                  onClick={() => handlePageChange(page - 1)}
-                  disabled={page === 1}
-                >
-                  Previous
-                </Button>
-                <span className="text-muted-foreground text-sm">
-                  Page {page}
-                </span>
-                <Button
-                  variant="outline"
-                  onClick={() => handlePageChange(page + 1)}
-                >
-                  Next
-                </Button>
+                <TabsContent value="news" className="space-y-4">
+                  {allResults.map((result: SearchResult, index: number) => (
+                    <article
+                      key={index}
+                      aria-posinset={index + 1}
+                      aria-setsize={allResults.length}
+                    >
+                      <NewsResultCard result={result} />
+                    </article>
+                  ))}
+                </TabsContent>
               </div>
+
+              {isFetchingNextPage && (
+                <div
+                  className="flex justify-center py-8"
+                  aria-live="polite"
+                  aria-busy="true"
+                >
+                  <Spinner className="h-6 w-6" />
+                  <span className="text-muted-foreground ml-2">
+                    Loading more results...
+                  </span>
+                </div>
+              )}
+
+              <div
+                ref={loadMoreRef}
+                className="h-20 w-full"
+                aria-live="polite"
+                aria-busy={isFetchingNextPage}
+              />
+
+              {!hasNextPage && allResults.length > 0 && (
+                <div className="flex justify-center py-8">
+                  <span className="text-muted-foreground">No more results</span>
+                </div>
+              )}
             </>
           )}
         </div>

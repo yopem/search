@@ -1,8 +1,6 @@
 "use client"
 
-import Image from "next/image"
-
-import { Card } from "@/components/ui/card"
+import { useState } from "react"
 
 interface ImageResult {
   title: string
@@ -13,10 +11,13 @@ interface ImageResult {
 }
 
 const ImageResultCard = ({ result }: { result: ImageResult }) => {
+  const [imageError, setImageError] = useState(false)
+  const [imageLoaded, setImageLoaded] = useState(false)
+
   const rawImageUrl =
     result.img_src ?? result.thumbnail_src ?? result.thumbnail ?? ""
 
-  if (!rawImageUrl) {
+  if (!rawImageUrl || imageError) {
     return null
   }
 
@@ -24,26 +25,54 @@ const ImageResultCard = ({ result }: { result: ImageResult }) => {
     ? `https:${rawImageUrl}`
     : rawImageUrl
 
+  const extractDomain = (url: string) => {
+    try {
+      const domain = new URL(url).hostname
+      return domain.replace("www.", "")
+    } catch {
+      return ""
+    }
+  }
+
   return (
-    <Card className="group hover:ring-primary overflow-hidden transition-all hover:ring-2">
-      <a href={result.url} target="_blank" rel="noopener noreferrer">
-        <div className="relative aspect-square">
-          <Image
+    <div className="group relative overflow-hidden rounded-lg">
+      <a
+        href={result.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block"
+      >
+        <div className="bg-muted relative aspect-square overflow-hidden rounded-lg">
+          {!imageLoaded && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="bg-muted-foreground/20 h-8 w-8 animate-pulse rounded-full" />
+            </div>
+          )}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
             src={imageUrl}
             alt={result.title}
-            fill
-            className="object-cover"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            unoptimized
+            className={`h-full w-full object-cover transition-all duration-300 group-hover:scale-105 ${
+              imageLoaded ? "opacity-100" : "opacity-0"
+            }`}
+            loading="lazy"
+            onLoad={() => setImageLoaded(true)}
+            onError={() => setImageError(true)}
           />
+          <div className="absolute inset-0 bg-black/0 transition-all group-hover:bg-black/10" />
         </div>
-        <div className="p-2">
-          <p className="text-muted-foreground group-hover:text-foreground line-clamp-2 text-xs transition-colors">
+        <div className="absolute right-0 bottom-0 left-0 translate-y-full bg-gradient-to-t from-black/80 to-transparent p-3 transition-transform group-hover:translate-y-0">
+          <p className="line-clamp-2 text-xs font-medium text-white">
             {result.title}
           </p>
+          {extractDomain(result.url) && (
+            <p className="mt-1 text-xs text-white/70">
+              {extractDomain(result.url)}
+            </p>
+          )}
         </div>
       </a>
-    </Card>
+    </div>
   )
 }
 
