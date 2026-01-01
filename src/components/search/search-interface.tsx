@@ -439,18 +439,12 @@ const SearchInterface = ({ mode, session }: SearchInterfaceProps) => {
             </div>
 
             {category !== "images" && (
-              <div className="hidden flex-1 lg:block">
-                {!isLoading &&
-                  !error &&
-                  allResults.length > 0 &&
-                  !hasNextPage && (
-                    <div className="sticky top-[140px]">
-                      <RelatedSearches
-                        query={initialQuery}
-                        category={category}
-                      />
-                    </div>
-                  )}
+              <div className="hidden w-[300px] shrink-0 lg:block">
+                {!isLoading && !error && allResults.length > 0 && (
+                  <div className="sticky top-[140px]">
+                    <RelatedSearches query={initialQuery} category={category} />
+                  </div>
+                )}
               </div>
             )}
 

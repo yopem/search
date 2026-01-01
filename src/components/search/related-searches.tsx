@@ -22,7 +22,7 @@ const RelatedSearches = ({ query, category }: RelatedSearchesProps) => {
 
   const filtered = suggestions
     .filter((s: string) => s.toLowerCase() !== query.toLowerCase())
-    .slice(0, 12)
+    .slice(0, 6)
 
   if (filtered.length === 0) {
     return null
@@ -30,17 +30,17 @@ const RelatedSearches = ({ query, category }: RelatedSearchesProps) => {
 
   return (
     <div className="mt-8">
-      <h2 className="text-muted-foreground mb-3 text-sm font-medium">
+      <h2 className="text-muted-foreground mb-2 text-sm font-medium">
         Related Searches
       </h2>
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+      <div className="flex flex-col gap-2">
         {filtered.map((suggestion) => (
           <Link
             key={suggestion}
             href={`/search?q=${encodeURIComponent(suggestion)}&category=${category}`}
             prefetch={false}
           >
-            <Card className="hover:bg-accent/50 cursor-pointer p-3 transition-colors">
+            <Card className="hover:bg-accent/50 p-3 transition-colors">
               <div className="flex items-center gap-2">
                 <SearchIcon className="text-muted-foreground h-4 w-4 shrink-0" />
                 <span className="text-sm">{suggestion}</span>

@@ -32,6 +32,7 @@ const REGIONS = [
   { value: "ja-JP", label: "Japan" },
   { value: "es-ES", label: "Spain" },
   { value: "pt-BR", label: "Brazil" },
+  { value: "id-ID", label: "Indonesia" },
 ]
 
 const SAFE_SEARCH_OPTIONS = [
@@ -58,7 +59,8 @@ const SearchFilters = ({
         <MenuTrigger
           render={
             <Button variant="outline" size="sm">
-              {REGIONS.find((r) => r.value === region)?.label ?? "Auto"}
+              {TIME_RANGES.find((t) => t.value === timeRange)?.label ??
+                "Any time"}
             </Button>
           }
         />
@@ -78,8 +80,7 @@ const SearchFilters = ({
         <MenuTrigger
           render={
             <Button variant="outline" size="sm">
-              {TIME_RANGES.find((t) => t.value === timeRange)?.label ??
-                "Any time"}
+              {REGIONS.find((r) => r.value === region)?.label ?? "Auto"}
             </Button>
           }
         />
