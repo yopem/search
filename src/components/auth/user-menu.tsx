@@ -1,8 +1,10 @@
 "use client"
 
 import Link from "next/link"
-import { LogOutIcon, SettingsIcon } from "lucide-react"
+import { SettingsIcon } from "lucide-react"
 
+import LogoutMenuItem from "@/components/auth/logout-menu-item"
+import ThemeSwitcherMenu from "@/components/theme/theme-switcher-menu"
 import { Button } from "@/components/ui/button"
 import {
   Menu,
@@ -11,7 +13,6 @@ import {
   MenuSeparator,
   MenuTrigger,
 } from "@/components/ui/menu"
-import { logout } from "@/lib/auth/logout"
 
 interface UserMenuProps {
   user: {
@@ -79,17 +80,8 @@ const UserMenu = (props: UserMenuProps) => {
           <SettingsIcon className="mr-2 size-4" />
           Settings
         </MenuItem>
-        <MenuSeparator />
-        <MenuItem
-          render={
-            <form action={logout} className="w-full">
-              <button type="submit" className="flex w-full items-center" />
-            </form>
-          }
-        >
-          <LogOutIcon className="mr-2 size-4" />
-          Sign out
-        </MenuItem>
+        <ThemeSwitcherMenu />
+        <LogoutMenuItem />
       </MenuPopup>
     </Menu>
   )

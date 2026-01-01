@@ -3,7 +3,6 @@ import { LogInIcon } from "lucide-react"
 
 import UserMenu from "@/components/auth/user-menu"
 import Logo from "@/components/logo"
-import ThemeSwitcher from "@/components/theme/theme-switcher"
 import { Button } from "@/components/ui/button"
 import { auth } from "@/lib/auth/session"
 
@@ -37,7 +36,6 @@ const SiteHeader = async () => {
               <span className="sr-only">Sign in</span>
             </Button>
           )}
-          <ThemeSwitcher />
         </div>
       </div>
     </header>
