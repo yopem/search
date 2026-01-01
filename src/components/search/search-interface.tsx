@@ -78,6 +78,8 @@ const SearchInterface = ({
   const searchParams = useSearchParams()
   const loadMoreRef = useRef<HTMLDivElement>(null)
   const pageObserversRef = useRef<IntersectionObserver[]>([])
+  const lastObserverPageRef = useRef<string | null>(null)
+  const manualPageChangeRef = useRef<boolean>(false)
 
   const initialQuery = mode === "results" ? (searchParams.get("q") ?? "") : ""
 
@@ -175,8 +177,20 @@ const SearchInterface = ({
   }, [initialQuery, mode])
 
   useEffect(() => {
-    if (mode === "results" && !page) {
-      void setPage("1")
+    if (mode !== "results") {
+      return
+    }
+
+    if (!page) {
+      void setPage("1", { history: "replace" })
+      return
+    }
+
+    const pageNumber = parseInt(page)
+
+    if (isNaN(pageNumber) || pageNumber < 1) {
+      void setPage("1", { history: "replace" })
+      return
     }
   }, [mode, page, setPage])
 
@@ -229,6 +243,14 @@ const SearchInterface = ({
           (entries) => {
             entries.forEach((entry) => {
               if (entry.isIntersecting && entry.intersectionRatio > 0.1) {
+                const currentPageParam = parseInt(page ?? "1")
+                const pagesLoaded = data.pages.length
+
+                if (currentPageParam > pagesLoaded) {
+                  return
+                }
+
+                lastObserverPageRef.current = pageNumber.toString()
                 void setPage(pageNumber.toString())
               }
             })
@@ -252,7 +274,44 @@ const SearchInterface = ({
       pageObserversRef.current.forEach((observer) => observer.disconnect())
       pageObserversRef.current = []
     }
-  }, [data?.pages, mode, setPage])
+  }, [data?.pages, mode, setPage, page])
+
+  useEffect(() => {
+    if (!page || mode !== "results" || !data?.pages) {
+      return
+    }
+
+    if (lastObserverPageRef.current === page) {
+      lastObserverPageRef.current = null
+      return
+    }
+
+    const pageNumber = parseInt(page)
+    if (isNaN(pageNumber) || pageNumber < 1) {
+      return
+    }
+
+    const currentPagesLoaded = data.pages.length
+
+    if (pageNumber > currentPagesLoaded && hasNextPage && !isFetchingNextPage) {
+      void fetchNextPage()
+      return
+    }
+
+    const targetPage = document.querySelector(`[data-page="${pageNumber}"]`)
+
+    if (targetPage) {
+      manualPageChangeRef.current = true
+      const yOffset = -140
+      const y =
+        targetPage.getBoundingClientRect().top + window.pageYOffset + yOffset
+      window.scrollTo({ top: y, behavior: "smooth" })
+
+      setTimeout(() => {
+        manualPageChangeRef.current = false
+      }, 1000)
+    }
+  }, [page, mode, data?.pages, hasNextPage, isFetchingNextPage, fetchNextPage])
 
   const queryClient = useQueryClient()
 
