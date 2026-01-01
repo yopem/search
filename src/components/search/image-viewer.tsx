@@ -96,7 +96,10 @@ const ImageViewer = ({
       <DialogPortal>
         <DialogBackdrop onClick={onClose} />
         <DialogViewport className="grid-rows-1 p-0">
-          <div className="relative flex h-screen w-screen items-center justify-center">
+          <div
+            className="relative flex h-screen w-screen items-center justify-center"
+            onClick={onClose}
+          >
             <DialogClose
               aria-label="Close"
               className="absolute top-4 left-4 z-10"
@@ -147,7 +150,10 @@ const ImageViewer = ({
               <ChevronRightIcon className="h-6 w-6" />
             </Button>
 
-            <div className="flex max-h-screen max-w-screen flex-col items-center justify-center p-16">
+            <div
+              className="flex max-h-screen max-w-screen flex-col items-center justify-center p-16"
+              onClick={(e) => e.stopPropagation()}
+            >
               {!imageLoaded && !imageError && (
                 <div className="flex items-center justify-center">
                   <Spinner className="h-12 w-12 text-white" />
