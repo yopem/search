@@ -43,6 +43,19 @@ const CONVERSION_RATES: Record<string, Record<string, number>> = {
     milliliters: 3785.41,
     cups: 16,
   },
+  time: {
+    seconds: 1,
+    sec: 1,
+    s: 1,
+    minutes: 60,
+    min: 60,
+    m: 60,
+    hours: 3600,
+    hr: 3600,
+    h: 3600,
+    days: 86400,
+    d: 86400,
+  },
 }
 
 const UnitConverterWidget = ({ initialQuery }: UnitConverterProps) => {

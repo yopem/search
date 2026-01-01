@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query"
 import { parseAsString, parseAsStringLiteral, useQueryState } from "nuqs"
@@ -245,25 +245,97 @@ const SearchInterface = ({ mode, session }: SearchInterfaceProps) => {
     setIsViewerOpen(true)
   }
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     if (
       selectedImageIndex !== null &&
       selectedImageIndex < allResults.length - 1
     ) {
       setSelectedImageIndex(selectedImageIndex + 1)
     }
-  }
+  }, [selectedImageIndex, allResults.length])
 
-  const handlePrevious = () => {
+  const handlePrevious = useCallback(() => {
     if (selectedImageIndex !== null && selectedImageIndex > 0) {
       setSelectedImageIndex(selectedImageIndex - 1)
     }
-  }
+  }, [selectedImageIndex])
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setIsViewerOpen(false)
     setSelectedImageIndex(null)
-  }
+  }, [])
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement
+      ) {
+        return
+      }
+
+      if (e.key === "/" && mode === "results") {
+        e.preventDefault()
+        const searchInput = document.querySelector('input[type="text"]')
+        if (searchInput instanceof HTMLInputElement) {
+          searchInput.focus()
+        }
+      }
+
+      if (e.key === "Escape" && mode === "results") {
+        const searchInput = document.querySelector('input[type="text"]')
+        if (
+          searchInput instanceof HTMLInputElement &&
+          searchInput === document.activeElement
+        ) {
+          searchInput.blur()
+        }
+      }
+
+      if (isViewerOpen && selectedImageIndex !== null) {
+        if (e.key === "ArrowRight" || e.key === "l") {
+          e.preventDefault()
+          handleNext()
+        }
+        if (e.key === "ArrowLeft" || e.key === "h") {
+          e.preventDefault()
+          handlePrevious()
+        }
+        if (e.key === "Escape") {
+          e.preventDefault()
+          handleClose()
+        }
+      }
+
+      if (e.key === "1") {
+        e.preventDefault()
+        void setCategory("general")
+      } else if (e.key === "2") {
+        e.preventDefault()
+        void setCategory("images")
+      } else if (e.key === "3") {
+        e.preventDefault()
+        void setCategory("videos")
+      } else if (e.key === "4") {
+        e.preventDefault()
+        void setCategory("news")
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown)
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown)
+    }
+  }, [
+    mode,
+    isViewerOpen,
+    selectedImageIndex,
+    setCategory,
+    handleNext,
+    handlePrevious,
+    handleClose,
+  ])
 
   if (mode === "home") {
     return (
