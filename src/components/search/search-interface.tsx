@@ -394,6 +394,14 @@ const SearchInterface = ({ mode, session }: SearchInterfaceProps) => {
                 }}
               />
 
+              {!isLoading && !error && data?.pages[0] && (
+                <div className="text-muted-foreground mb-4 text-sm">
+                  {data.pages[0].totalResults.toLocaleString()} results (
+                  {(data.pages[0]._meta.responseTime / 1000).toFixed(2)}{" "}
+                  seconds)
+                </div>
+              )}
+
               {instantAnswer?.type === "calculator" && (
                 <CalculatorWidget initialExpression={instantAnswer.data} />
               )}
@@ -406,12 +414,7 @@ const SearchInterface = ({ mode, session }: SearchInterfaceProps) => {
                 <WeatherWidget initialQuery={instantAnswer.data} />
               )}
 
-              {error && (
-                <SearchError
-                  message="Failed to fetch search results"
-                  onRetry={() => refetch()}
-                />
-              )}
+              {error && <SearchError error={error} onRetry={() => refetch()} />}
 
               {isLoading && <SearchSkeleton category={category} />}
 
@@ -544,6 +547,16 @@ const SearchInterface = ({ mode, session }: SearchInterfaceProps) => {
           currentIndex={selectedImageIndex}
           totalImages={allResults.length}
           image={allResults[selectedImageIndex]}
+          nextImage={
+            selectedImageIndex < allResults.length - 1
+              ? allResults[selectedImageIndex + 1]
+              : undefined
+          }
+          previousImage={
+            selectedImageIndex > 0
+              ? allResults[selectedImageIndex - 1]
+              : undefined
+          }
           onNext={handleNext}
           onPrevious={handlePrevious}
         />

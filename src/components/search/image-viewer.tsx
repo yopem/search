@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import {
   ChevronLeft as ChevronLeftIcon,
   ChevronRight as ChevronRightIcon,
@@ -33,6 +33,24 @@ interface ImageViewerProps {
     resolution?: string
     img_format?: string
   }
+  nextImage?: {
+    title: string
+    url: string
+    img_src?: string
+    thumbnail?: string
+    thumbnail_src?: string
+    resolution?: string
+    img_format?: string
+  }
+  previousImage?: {
+    title: string
+    url: string
+    img_src?: string
+    thumbnail?: string
+    thumbnail_src?: string
+    resolution?: string
+    img_format?: string
+  }
   onNext: () => void
   onPrevious: () => void
 }
@@ -43,6 +61,8 @@ const ImageViewer = ({
   currentIndex,
   totalImages,
   image,
+  nextImage,
+  previousImage,
   onNext,
   onPrevious,
 }: ImageViewerProps) => {
@@ -55,6 +75,11 @@ const ImageViewer = ({
   const imageUrl = rawImageUrl.startsWith("//")
     ? `https:${rawImageUrl}`
     : rawImageUrl
+
+  const getImageUrl = useCallback((img: typeof image) => {
+    const raw = img.img_src ?? img.thumbnail_src ?? img.thumbnail ?? ""
+    return raw.startsWith("//") ? `https:${raw}` : raw
+  }, [])
 
   const extractDomain = (url: string) => {
     try {
@@ -69,6 +94,17 @@ const ImageViewer = ({
     setImageLoaded(false)
     setImageError(false)
   }, [currentIndex])
+
+  useEffect(() => {
+    if (nextImage) {
+      const img = new Image()
+      img.src = getImageUrl(nextImage)
+    }
+    if (previousImage) {
+      const img = new Image()
+      img.src = getImageUrl(previousImage)
+    }
+  }, [nextImage, previousImage, getImageUrl])
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
