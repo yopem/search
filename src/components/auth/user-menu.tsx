@@ -48,7 +48,8 @@ function getColorFromEmail(email: string) {
   return colors[Math.abs(hash) % colors.length]
 }
 
-export function UserMenu({ user }: UserMenuProps) {
+const UserMenu = (props: UserMenuProps) => {
+  const { user } = props
   const initial = getInitial(user)
   const bgColor = getColorFromEmail(user.email)
 
@@ -93,3 +94,5 @@ export function UserMenu({ user }: UserMenuProps) {
     </Menu>
   )
 }
+
+export default UserMenu

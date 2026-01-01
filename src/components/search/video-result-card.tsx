@@ -19,7 +19,7 @@ interface VideoResult {
   thumbnail?: string
 }
 
-export function VideoResultCard({ result }: { result: VideoResult }) {
+const VideoResultCard = ({ result }: { result: VideoResult }) => {
   const displayUrl = new URL(result.url).hostname.replace("www.", "")
 
   return (
@@ -58,3 +58,5 @@ export function VideoResultCard({ result }: { result: VideoResult }) {
     </Card>
   )
 }
+
+export default VideoResultCard

@@ -5,7 +5,7 @@ import localFont from "next/font/local"
 
 import Providers from "@/components/providers"
 import Scripts from "@/components/scripts"
-import { SiteHeader } from "@/components/site-header"
+import SiteHeader from "@/components/site-header"
 import { siteDescription, siteTitle } from "@/lib/env/client"
 
 export const metadata: Metadata = {

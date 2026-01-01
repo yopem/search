@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation"
 
-import { SettingsContent } from "@/components/settings/settings-content"
+import SettingsContent from "@/components/settings/settings-content"
 import { auth } from "@/lib/auth/session"
 
 export default async function SettingsPage() {

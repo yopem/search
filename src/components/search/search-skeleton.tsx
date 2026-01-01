@@ -2,7 +2,7 @@
 
 import { Skeleton } from "@/components/ui/skeleton"
 
-export function SearchSkeleton() {
+const SearchSkeleton = () => {
   return (
     <div className="space-y-6">
       <div className="space-y-4">
@@ -17,3 +17,5 @@ export function SearchSkeleton() {
     </div>
   )
 }
+
+export default SearchSkeleton

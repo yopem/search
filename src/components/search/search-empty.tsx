@@ -2,7 +2,7 @@
 
 import { Search } from "lucide-react"
 
-export function SearchEmpty({ query }: { query: string }) {
+const SearchEmpty = ({ query }: { query: string }) => {
   return (
     <div className="flex flex-col items-center justify-center py-12 text-center">
       <Search className="text-muted-foreground mb-4 h-12 w-12" />
@@ -13,3 +13,5 @@ export function SearchEmpty({ query }: { query: string }) {
     </div>
   )
 }
+
+export default SearchEmpty

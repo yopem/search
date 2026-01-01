@@ -16,7 +16,7 @@ interface WebResult {
   engine?: string
 }
 
-export function WebResultCard({ result }: { result: WebResult }) {
+const WebResultCard = ({ result }: { result: WebResult }) => {
   const displayUrl = new URL(result.url).hostname.replace("www.", "")
 
   return (
@@ -49,3 +49,5 @@ export function WebResultCard({ result }: { result: WebResult }) {
     </Card>
   )
 }
+
+export default WebResultCard

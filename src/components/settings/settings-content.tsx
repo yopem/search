@@ -2,14 +2,14 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
-import { SearchHistory } from "@/components/search/search-history"
+import SearchHistory from "@/components/search/search-history"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
 import { queryApi } from "@/lib/orpc/query"
 
-export function SettingsContent() {
+const SettingsContent = () => {
   const queryClient = useQueryClient()
 
   const { data: settings, isLoading } = useQuery({
@@ -84,3 +84,5 @@ export function SettingsContent() {
     </div>
   )
 }
+
+export default SettingsContent

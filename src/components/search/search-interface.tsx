@@ -5,14 +5,14 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { useQuery } from "@tanstack/react-query"
 
 import Logo from "@/components/logo"
-import { ImageResultCard } from "@/components/search/image-result-card"
-import { NewsResultCard } from "@/components/search/news-result-card"
-import { SearchAutocomplete } from "@/components/search/search-autocomplete"
-import { SearchEmpty } from "@/components/search/search-empty"
-import { SearchError } from "@/components/search/search-error"
-import { SearchSkeleton } from "@/components/search/search-skeleton"
-import { VideoResultCard } from "@/components/search/video-result-card"
-import { WebResultCard } from "@/components/search/web-result-card"
+import ImageResultCard from "@/components/search/image-result-card"
+import NewsResultCard from "@/components/search/news-result-card"
+import SearchAutocomplete from "@/components/search/search-autocomplete"
+import SearchEmpty from "@/components/search/search-empty"
+import SearchError from "@/components/search/search-error"
+import SearchSkeleton from "@/components/search/search-skeleton"
+import VideoResultCard from "@/components/search/video-result-card"
+import WebResultCard from "@/components/search/web-result-card"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { queryApi } from "@/lib/orpc/query"
@@ -35,7 +35,7 @@ interface SearchInterfaceProps {
   mode: "home" | "results"
 }
 
-export function SearchInterface({ mode }: SearchInterfaceProps) {
+const SearchInterface = ({ mode }: SearchInterfaceProps) => {
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -208,3 +208,5 @@ export function SearchInterface({ mode }: SearchInterfaceProps) {
     </div>
   )
 }
+
+export default SearchInterface

@@ -1,8 +1,8 @@
 import { Suspense } from "react"
 import { redirect } from "next/navigation"
 
-import { SearchInterface } from "@/components/search/search-interface"
-import { SearchSkeleton } from "@/components/search/search-skeleton"
+import SearchInterface from "@/components/search/search-interface"
+import SearchSkeleton from "@/components/search/search-skeleton"
 
 interface SearchPageProps {
   searchParams: Promise<{ q?: string }>

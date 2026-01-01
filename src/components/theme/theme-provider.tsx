@@ -6,9 +6,7 @@ interface ThemeProviderProps {
   children: React.ReactNode
 }
 
-const ThemeProvider = (props: ThemeProviderProps) => {
-  const { children } = props
-
+const ThemeProvider = ({ children }: ThemeProviderProps) => {
   return (
     <NextThemeProvider
       attribute="class"

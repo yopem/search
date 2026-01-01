@@ -21,7 +21,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { queryApi } from "@/lib/orpc/query"
 
-export function SearchHistory() {
+const SearchHistory = () => {
   const queryClient = useQueryClient()
   const [showClearDialog, setShowClearDialog] = useState(false)
 
@@ -128,3 +128,5 @@ export function SearchHistory() {
     </Card>
   )
 }
+
+export default SearchHistory

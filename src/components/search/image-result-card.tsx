@@ -12,7 +12,7 @@ interface ImageResult {
   thumbnail_src?: string
 }
 
-export function ImageResultCard({ result }: { result: ImageResult }) {
+const ImageResultCard = ({ result }: { result: ImageResult }) => {
   const rawImageUrl =
     result.img_src ?? result.thumbnail_src ?? result.thumbnail ?? ""
 
@@ -46,3 +46,5 @@ export function ImageResultCard({ result }: { result: ImageResult }) {
     </Card>
   )
 }
+
+export default ImageResultCard

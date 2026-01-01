@@ -1,5 +1,5 @@
-import { SearchInterface } from "@/components/search/search-interface"
+import SearchInterface from "@/components/search/search-interface"
 
-export default function Home() {
+export default function HomePage() {
   return <SearchInterface mode="home" />
 }

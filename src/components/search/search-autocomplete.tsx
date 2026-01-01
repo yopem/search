@@ -15,12 +15,12 @@ interface SearchAutocompleteProps {
   placeholder?: string
 }
 
-export function SearchAutocomplete({
+const SearchAutocomplete = ({
   value,
   onChange,
   onSubmit,
   placeholder = "Search the web...",
-}: SearchAutocompleteProps) {
+}: SearchAutocompleteProps) => {
   const [isOpen, setIsOpen] = useState(false)
   const queryClient = useQueryClient()
 
@@ -141,3 +141,5 @@ export function SearchAutocomplete({
     </div>
   )
 }
+
+export default SearchAutocomplete

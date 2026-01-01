@@ -17,7 +17,7 @@ interface NewsResult {
   author?: string
 }
 
-export function NewsResultCard({ result }: { result: NewsResult }) {
+const NewsResultCard = ({ result }: { result: NewsResult }) => {
   const displayUrl = new URL(result.url).hostname.replace("www.", "")
   const publishedDate = result.publishedDate
     ? new Date(result.publishedDate).toLocaleDateString()
@@ -58,3 +58,5 @@ export function NewsResultCard({ result }: { result: NewsResult }) {
     </Card>
   )
 }
+
+export default NewsResultCard

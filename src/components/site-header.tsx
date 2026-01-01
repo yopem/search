@@ -1,13 +1,13 @@
 import Link from "next/link"
 import { LogIn } from "lucide-react"
 
-import { UserMenu } from "@/components/auth/user-menu"
+import UserMenu from "@/components/auth/user-menu"
 import Logo from "@/components/logo"
 import ThemeSwitcher from "@/components/theme/theme-switcher"
 import { Button } from "@/components/ui/button"
 import { auth } from "@/lib/auth/session"
 
-export async function SiteHeader() {
+const SiteHeader = async () => {
   const session = await auth()
 
   return (
@@ -43,3 +43,5 @@ export async function SiteHeader() {
     </header>
   )
 }
+
+export default SiteHeader
