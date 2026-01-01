@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
+import { toastManager } from "@/components/ui/toast"
 import { queryApi } from "@/lib/orpc/query"
 
 const SettingsContent = () => {
@@ -29,11 +30,35 @@ const SettingsContent = () => {
 
   const handleToggleSearchHistory = (checked: boolean) => {
     updateMutation.mutate({ showSearchHistory: checked })
+    toastManager.add({
+      title: "Settings updated",
+      description: checked
+        ? "Search history will be saved"
+        : "Search history will not be saved",
+    })
+  }
+
+  const handleToggleOpenInNewTab = (checked: boolean) => {
+    updateMutation.mutate({ openInNewTab: checked })
+    toastManager.add({
+      title: "Settings updated",
+      description: checked
+        ? "Links will open in new tabs"
+        : "Links will open in same tab",
+    })
   }
 
   if (isLoading) {
     return (
       <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-6 w-48" />
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-12 w-full" />
+          </CardContent>
+        </Card>
         <Card>
           <CardHeader>
             <Skeleton className="h-6 w-48" />
@@ -48,6 +73,27 @@ const SettingsContent = () => {
 
   return (
     <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Link Behavior</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Field className="flex flex-row items-center justify-between gap-4">
+            <div className="flex-1">
+              <FieldLabel>Open links in new tab</FieldLabel>
+              <FieldDescription>
+                Search results and external links open in a new browser tab
+              </FieldDescription>
+            </div>
+            <Switch
+              checked={settings?.openInNewTab ?? true}
+              onCheckedChange={handleToggleOpenInNewTab}
+              disabled={updateMutation.isPending}
+            />
+          </Field>
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader>
           <CardTitle>Search History</CardTitle>

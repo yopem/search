@@ -18,7 +18,13 @@ interface WebResult {
   engine?: string
 }
 
-const WebResultCard = ({ result }: { result: WebResult }) => {
+const WebResultCard = ({
+  result,
+  openInNewTab = true,
+}: {
+  result: WebResult
+  openInNewTab?: boolean
+}) => {
   const [faviconError, setFaviconError] = useState(false)
 
   const displayUrl = new URL(result.url).hostname.replace("www.", "")
@@ -31,7 +37,7 @@ const WebResultCard = ({ result }: { result: WebResult }) => {
           <div className="flex-1 space-y-1">
             <a
               href={result.url}
-              target="_blank"
+              target={openInNewTab ? "_blank" : undefined}
               rel="noopener noreferrer"
               className="group"
             >
@@ -63,7 +69,9 @@ const WebResultCard = ({ result }: { result: WebResult }) => {
               </CardDescription>
             )}
           </div>
-          <ExternalLinkIcon className="text-muted-foreground h-3.5 w-3.5 shrink-0" />
+          {openInNewTab && (
+            <ExternalLinkIcon className="text-muted-foreground h-3.5 w-3.5 shrink-0" />
+          )}
         </div>
       </CardHeader>
     </Card>

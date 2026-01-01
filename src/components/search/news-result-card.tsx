@@ -23,7 +23,13 @@ interface NewsResult {
   author?: string
 }
 
-const NewsResultCard = ({ result }: { result: NewsResult }) => {
+const NewsResultCard = ({
+  result,
+  openInNewTab = true,
+}: {
+  result: NewsResult
+  openInNewTab?: boolean
+}) => {
   const [faviconError, setFaviconError] = useState(false)
 
   const displayUrl = new URL(result.url).hostname.replace("www.", "")
@@ -39,7 +45,7 @@ const NewsResultCard = ({ result }: { result: NewsResult }) => {
           <div className="flex-1 space-y-1">
             <a
               href={result.url}
-              target="_blank"
+              target={openInNewTab ? "_blank" : undefined}
               rel="noopener noreferrer"
               className="group"
             >
@@ -76,7 +82,9 @@ const NewsResultCard = ({ result }: { result: NewsResult }) => {
               </CardDescription>
             )}
           </div>
-          <ExternalLinkIcon className="text-muted-foreground h-3.5 w-3.5 shrink-0" />
+          {openInNewTab && (
+            <ExternalLinkIcon className="text-muted-foreground h-3.5 w-3.5 shrink-0" />
+          )}
         </div>
       </CardHeader>
     </Card>

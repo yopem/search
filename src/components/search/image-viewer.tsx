@@ -53,6 +53,7 @@ interface ImageViewerProps {
   }
   onNext: () => void
   onPrevious: () => void
+  openInNewTab?: boolean
 }
 
 const ImageViewer = ({
@@ -65,6 +66,7 @@ const ImageViewer = ({
   previousImage,
   onNext,
   onPrevious,
+  openInNewTab = true,
 }: ImageViewerProps) => {
   const [imageLoaded, setImageLoaded] = useState(false)
   const [imageError, setImageError] = useState(false)
@@ -253,7 +255,7 @@ const ImageViewer = ({
                           )}
                           <a
                             href={image.url}
-                            target="_blank"
+                            target={openInNewTab ? "_blank" : undefined}
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-1 text-sm text-white transition-colors hover:text-white/80"
                           >

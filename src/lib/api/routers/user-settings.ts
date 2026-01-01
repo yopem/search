@@ -22,6 +22,7 @@ export const userSettingsRouter = {
         .values({
           userId: context.session.id,
           showSearchHistory: true,
+          openInNewTab: true,
         })
         .returning()
 
@@ -37,13 +38,19 @@ export const userSettingsRouter = {
   }),
 
   update: protectedProcedure
-    .input(updateUserSettingsSchema.pick({ showSearchHistory: true }))
+    .input(
+      updateUserSettingsSchema.pick({
+        showSearchHistory: true,
+        openInNewTab: true,
+      }),
+    )
     .handler(async ({ input, context }) => {
       try {
         const result = await context.db
           .update(userSettingsTable)
           .set({
             showSearchHistory: input.showSearchHistory,
+            openInNewTab: input.openInNewTab,
             updatedAt: new Date(),
           })
           .where(eq(userSettingsTable.userId, context.session.id))

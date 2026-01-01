@@ -48,6 +48,7 @@ interface SearchInterfaceProps {
     email: string
     name: string | null
   } | null
+  openInNewTab?: boolean
 }
 
 const BANG_MAPPINGS: Record<string, string> = {
@@ -67,7 +68,11 @@ const BANG_MAPPINGS: Record<string, string> = {
   maps: "https://www.google.com/maps/search/",
 }
 
-const SearchInterface = ({ mode, session }: SearchInterfaceProps) => {
+const SearchInterface = ({
+  mode,
+  session,
+  openInNewTab = true,
+}: SearchInterfaceProps) => {
   const router = useRouter()
   const searchParams = useSearchParams()
   const loadMoreRef = useRef<HTMLDivElement>(null)
@@ -445,7 +450,10 @@ const SearchInterface = ({ mode, session }: SearchInterfaceProps) => {
                               aria-posinset={index + 1}
                               aria-setsize={allResults.length}
                             >
-                              <WebResultCard result={result} />
+                              <WebResultCard
+                                result={result}
+                                openInNewTab={openInNewTab}
+                              />
                             </article>
                           ),
                         )}
@@ -475,7 +483,10 @@ const SearchInterface = ({ mode, session }: SearchInterfaceProps) => {
                               aria-posinset={index + 1}
                               aria-setsize={allResults.length}
                             >
-                              <VideoResultCard result={result} />
+                              <VideoResultCard
+                                result={result}
+                                openInNewTab={openInNewTab}
+                              />
                             </article>
                           ),
                         )}
@@ -491,7 +502,10 @@ const SearchInterface = ({ mode, session }: SearchInterfaceProps) => {
                               aria-posinset={index + 1}
                               aria-setsize={allResults.length}
                             >
-                              <NewsResultCard result={result} />
+                              <NewsResultCard
+                                result={result}
+                                openInNewTab={openInNewTab}
+                              />
                             </article>
                           ),
                         )}
@@ -566,6 +580,7 @@ const SearchInterface = ({ mode, session }: SearchInterfaceProps) => {
           }
           onNext={handleNext}
           onPrevious={handlePrevious}
+          openInNewTab={openInNewTab}
         />
       )}
     </>

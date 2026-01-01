@@ -106,8 +106,6 @@ const SearchHistory = () => {
                     <Badge variant="secondary" className="capitalize">
                       {item.category}
                     </Badge>
-                    <span>{item.resultCount} results</span>
-                    <span>•</span>
                     <span>{new Date(item.timestamp).toLocaleDateString()}</span>
                   </div>
                 </Link>

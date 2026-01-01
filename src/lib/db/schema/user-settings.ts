@@ -9,6 +9,7 @@ export const userSettingsTable = pgTable("user_settings", {
     .$defaultFn(() => createCustomId()),
   userId: text("user_id").notNull().unique(),
   showSearchHistory: boolean("show_search_history").notNull().default(true),
+  openInNewTab: boolean("open_in_new_tab").notNull().default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at")
     .defaultNow()

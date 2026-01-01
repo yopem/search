@@ -21,7 +21,13 @@ interface VideoResult {
   thumbnail?: string
 }
 
-const VideoResultCard = ({ result }: { result: VideoResult }) => {
+const VideoResultCard = ({
+  result,
+  openInNewTab = true,
+}: {
+  result: VideoResult
+  openInNewTab?: boolean
+}) => {
   const [faviconError, setFaviconError] = useState(false)
 
   const displayUrl = new URL(result.url).hostname.replace("www.", "")
@@ -34,7 +40,7 @@ const VideoResultCard = ({ result }: { result: VideoResult }) => {
           <div className="flex-1 space-y-1">
             <a
               href={result.url}
-              target="_blank"
+              target={openInNewTab ? "_blank" : undefined}
               rel="noopener noreferrer"
               className="group"
             >
@@ -74,7 +80,9 @@ const VideoResultCard = ({ result }: { result: VideoResult }) => {
               </CardDescription>
             )}
           </div>
-          <ExternalLinkIcon className="text-muted-foreground h-3.5 w-3.5 shrink-0" />
+          {openInNewTab && (
+            <ExternalLinkIcon className="text-muted-foreground h-3.5 w-3.5 shrink-0" />
+          )}
         </div>
       </CardHeader>
     </Card>
