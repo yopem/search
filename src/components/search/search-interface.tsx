@@ -196,7 +196,7 @@ const SearchInterface = ({ mode }: SearchInterfaceProps) => {
                 </TabsContent>
 
                 <TabsContent value="images">
-                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+                  <div className="flex flex-wrap gap-2 after:flex-auto after:content-['']">
                     {allResults.map((result: SearchResult, index: number) => (
                       <ImageResultCard key={index} result={result} />
                     ))}
