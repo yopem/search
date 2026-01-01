@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { Search } from "lucide-react"
+import { SearchIcon } from "lucide-react"
 
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -115,7 +115,7 @@ const SearchAutocomplete = ({
           className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2 transition-colors"
           aria-label="Search"
         >
-          <Search className="h-4 w-4" />
+          <SearchIcon className="h-4 w-4" />
         </button>
       </div>
 
@@ -130,7 +130,7 @@ const SearchAutocomplete = ({
                   onClick={() => handleSelect(suggestion)}
                   className="hover:bg-accent hover:text-accent-foreground flex w-full items-center gap-2 rounded-sm px-3 py-2 text-left text-sm"
                 >
-                  <Search className="text-muted-foreground h-4 w-4" />
+                  <SearchIcon className="text-muted-foreground h-4 w-4" />
                   <span>{suggestion}</span>
                 </button>
               ))}

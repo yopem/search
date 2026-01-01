@@ -1,6 +1,6 @@
 "use client"
 
-import { ExternalLink, Play } from "lucide-react"
+import { ExternalLinkIcon, PlayIcon } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import {
@@ -34,7 +34,7 @@ const VideoResultCard = ({ result }: { result: VideoResult }) => {
               className="group"
             >
               <div className="flex items-center gap-2">
-                <Play className="text-muted-foreground h-4 w-4" />
+                <PlayIcon className="text-muted-foreground h-4 w-4" />
                 <CardTitle className="text-base group-hover:underline">
                   {result.title}
                 </CardTitle>
@@ -52,7 +52,7 @@ const VideoResultCard = ({ result }: { result: VideoResult }) => {
               </CardDescription>
             )}
           </div>
-          <ExternalLink className="text-muted-foreground h-4 w-4" />
+          <ExternalLinkIcon className="text-muted-foreground h-4 w-4" />
         </div>
       </CardHeader>
     </Card>

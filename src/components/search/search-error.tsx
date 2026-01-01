@@ -1,6 +1,6 @@
 "use client"
 
-import { AlertCircle } from "lucide-react"
+import { AlertCircleIcon } from "lucide-react"
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
@@ -14,7 +14,7 @@ const SearchError = ({
 }) => {
   return (
     <Alert variant="error">
-      <AlertCircle className="h-4 w-4" />
+      <AlertCircleIcon className="h-4 w-4" />
       <AlertTitle>Error</AlertTitle>
       <AlertDescription className="flex items-center justify-between">
         <span>{message}</span>

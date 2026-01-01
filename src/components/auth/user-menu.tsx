@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { LogOut, Settings } from "lucide-react"
+import { LogOutIcon, SettingsIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -76,7 +76,7 @@ const UserMenu = (props: UserMenuProps) => {
         </div>
         <MenuSeparator />
         <MenuItem render={<Link href="/settings" />}>
-          <Settings className="mr-2 size-4" />
+          <SettingsIcon className="mr-2 size-4" />
           Settings
         </MenuItem>
         <MenuSeparator />
@@ -87,7 +87,7 @@ const UserMenu = (props: UserMenuProps) => {
             </form>
           }
         >
-          <LogOut className="mr-2 size-4" />
+          <LogOutIcon className="mr-2 size-4" />
           Sign out
         </MenuItem>
       </MenuPopup>

@@ -1,6 +1,6 @@
 "use client"
 
-import { ExternalLink } from "lucide-react"
+import { ExternalLinkIcon } from "lucide-react"
 
 import {
   Card,
@@ -43,7 +43,7 @@ const WebResultCard = ({ result }: { result: WebResult }) => {
               </CardDescription>
             )}
           </div>
-          <ExternalLink className="text-muted-foreground h-4 w-4" />
+          <ExternalLinkIcon className="text-muted-foreground h-4 w-4" />
         </div>
       </CardHeader>
     </Card>

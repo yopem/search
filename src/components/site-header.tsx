@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { LogIn } from "lucide-react"
+import { LogInIcon } from "lucide-react"
 
 import UserMenu from "@/components/auth/user-menu"
 import Logo from "@/components/logo"
@@ -33,7 +33,7 @@ const SiteHeader = async () => {
               size="icon"
               render={<Link href="/auth/login" />}
             >
-              <LogIn className="size-4" />
+              <LogInIcon className="size-4" />
               <span className="sr-only">Sign in</span>
             </Button>
           )}

@@ -3,7 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { History, Trash2, X } from "lucide-react"
+import { HistoryIcon, Trash2Icon, XIcon } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -58,12 +58,12 @@ const SearchHistory = () => {
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
         <CardTitle className="flex items-center gap-2 text-base">
-          <History className="h-4 w-4" />
+          <HistoryIcon className="h-4 w-4" />
           Recent Searches
         </CardTitle>
         <Dialog open={showClearDialog} onOpenChange={setShowClearDialog}>
           <DialogTrigger render={<Button variant="ghost" size="sm" />}>
-            <Trash2 className="mr-2 h-4 w-4" />
+            <Trash2Icon className="mr-2 h-4 w-4" />
             Clear All
           </DialogTrigger>
           <DialogContent>
@@ -118,7 +118,7 @@ const SearchHistory = () => {
                   onClick={() => deleteMutation.mutate({ id: item.id })}
                   disabled={deleteMutation.isPending}
                 >
-                  <X className="h-4 w-4" />
+                  <XIcon className="h-4 w-4" />
                 </Button>
               </div>
             ))}

@@ -5,15 +5,6 @@ import { AlertTriangleIcon, RefreshCwIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 
-/**
- * Global error boundary for unhandled errors
- *
- * This component catches errors that occur during rendering
- * or in lifecycle methods anywhere in the application tree.
- *
- * @param error - The error that was thrown
- * @param reset - Function to attempt to recover by re-rendering the segment
- */
 export default function GlobalError({
   error,
   reset,

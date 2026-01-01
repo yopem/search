@@ -1,6 +1,6 @@
 "use client"
 
-import { ExternalLink, Newspaper } from "lucide-react"
+import { ExternalLinkIcon, NewspaperIcon } from "lucide-react"
 
 import {
   Card,
@@ -35,7 +35,7 @@ const NewsResultCard = ({ result }: { result: NewsResult }) => {
               className="group"
             >
               <div className="flex items-center gap-2">
-                <Newspaper className="text-muted-foreground h-4 w-4" />
+                <NewspaperIcon className="text-muted-foreground h-4 w-4" />
                 <CardTitle className="text-base group-hover:underline">
                   {result.title}
                 </CardTitle>
@@ -52,7 +52,7 @@ const NewsResultCard = ({ result }: { result: NewsResult }) => {
               </CardDescription>
             )}
           </div>
-          <ExternalLink className="text-muted-foreground h-4 w-4" />
+          <ExternalLinkIcon className="text-muted-foreground h-4 w-4" />
         </div>
       </CardHeader>
     </Card>
