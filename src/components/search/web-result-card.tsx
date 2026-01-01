@@ -1,6 +1,8 @@
 "use client"
 
-import { ExternalLinkIcon } from "lucide-react"
+import { useState } from "react"
+import Image from "next/image"
+import { ExternalLinkIcon, Globe as GlobeIcon } from "lucide-react"
 
 import {
   Card,
@@ -17,7 +19,10 @@ interface WebResult {
 }
 
 const WebResultCard = ({ result }: { result: WebResult }) => {
+  const [faviconError, setFaviconError] = useState(false)
+
   const displayUrl = new URL(result.url).hostname.replace("www.", "")
+  const faviconUrl = `https://www.google.com/s2/favicons?domain=${displayUrl}&sz=32`
 
   return (
     <Card className="hover:bg-accent/50 transition-colors">
@@ -35,6 +40,19 @@ const WebResultCard = ({ result }: { result: WebResult }) => {
               </CardTitle>
             </a>
             <div className="text-muted-foreground flex items-center gap-2 text-xs">
+              {!faviconError ? (
+                <Image
+                  src={faviconUrl}
+                  alt={`${displayUrl} favicon`}
+                  width={16}
+                  height={16}
+                  className="rounded-sm"
+                  onError={() => setFaviconError(true)}
+                  unoptimized
+                />
+              ) : (
+                <GlobeIcon className="text-muted-foreground h-4 w-4" />
+              )}
               <span>{displayUrl}</span>
             </div>
             {result.content && (
