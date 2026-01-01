@@ -350,9 +350,6 @@ const SearchInterface = ({ mode, session }: SearchInterfaceProps) => {
         <div className="flex flex-col items-center gap-4">
           <Logo className="h-24 w-auto" />
           <h1 className="text-4xl font-semibold">Yopem</h1>
-          <p className="text-muted-foreground max-w-md text-center">
-            Search the web without being tracked.
-          </p>
         </div>
 
         <div className="w-full max-w-2xl">
