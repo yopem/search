@@ -135,14 +135,23 @@ export const searchRouter = {
 
   history: {
     list: protectedProcedure.handler(async ({ context }) => {
-      const history = await context.db
-        .select()
-        .from(searchHistoryTable)
-        .where(eq(searchHistoryTable.userId, context.session.id))
-        .orderBy(desc(searchHistoryTable.timestamp))
-        .limit(50)
+      try {
+        const history = await context.db
+          .select()
+          .from(searchHistoryTable)
+          .where(eq(searchHistoryTable.userId, context.session.id))
+          .orderBy(desc(searchHistoryTable.timestamp))
+          .limit(50)
 
-      return history
+        return history
+      } catch (error) {
+        if (error instanceof ORPCError) {
+          throw error
+        }
+        throw new ORPCError("INTERNAL_SERVER_ERROR", {
+          message: "Failed to fetch search history",
+        })
+      }
     }),
 
     save: protectedProcedure
@@ -154,26 +163,53 @@ export const searchRouter = {
         }),
       )
       .handler(async ({ input, context }) => {
-        await context.db.insert(searchHistoryTable).values({
-          userId: context.session.id,
-          query: input.query,
-          category: input.category,
-          resultCount: input.resultCount,
-        })
+        try {
+          await context.db.insert(searchHistoryTable).values({
+            userId: context.session.id,
+            query: input.query,
+            category: input.category,
+            resultCount: input.resultCount,
+          })
+        } catch (error) {
+          if (error instanceof ORPCError) {
+            throw error
+          }
+          throw new ORPCError("INTERNAL_SERVER_ERROR", {
+            message: "Failed to save search history",
+          })
+        }
       }),
 
     delete: protectedProcedure
       .input(z.object({ id: z.string() }))
       .handler(async ({ input, context }) => {
-        await context.db
-          .delete(searchHistoryTable)
-          .where(eq(searchHistoryTable.id, input.id))
+        try {
+          await context.db
+            .delete(searchHistoryTable)
+            .where(eq(searchHistoryTable.id, input.id))
+        } catch (error) {
+          if (error instanceof ORPCError) {
+            throw error
+          }
+          throw new ORPCError("INTERNAL_SERVER_ERROR", {
+            message: "Failed to delete search history item",
+          })
+        }
       }),
 
     clearAll: protectedProcedure.handler(async ({ context }) => {
-      await context.db
-        .delete(searchHistoryTable)
-        .where(eq(searchHistoryTable.userId, context.session.id))
+      try {
+        await context.db
+          .delete(searchHistoryTable)
+          .where(eq(searchHistoryTable.userId, context.session.id))
+      } catch (error) {
+        if (error instanceof ORPCError) {
+          throw error
+        }
+        throw new ORPCError("INTERNAL_SERVER_ERROR", {
+          message: "Failed to clear search history",
+        })
+      }
     }),
   },
 }
