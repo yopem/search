@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { useInfiniteQuery } from "@tanstack/react-query"
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query"
 import { parseAsStringLiteral, useQueryState } from "nuqs"
 
 import Logo from "@/components/logo"
@@ -109,8 +109,15 @@ const SearchInterface = ({ mode }: SearchInterfaceProps) => {
     }
   }, [fetchNextPage, hasNextPage, isFetchingNextPage])
 
+  const queryClient = useQueryClient()
+
   const handleSearch = () => {
     if (!query.trim()) return
+
+    void queryClient.invalidateQueries({
+      predicate: (query) =>
+        query.queryKey[0] === "search" && query.queryKey[1] === "query",
+    })
 
     const params = new URLSearchParams()
     params.set("q", query)
@@ -121,6 +128,24 @@ const SearchInterface = ({ mode }: SearchInterfaceProps) => {
 
   const handleCategoryChange = (newCategory: string) => {
     void setCategory(newCategory as "general" | "images" | "videos" | "news")
+  }
+
+  const handleCategoryHover = (newCategory: string) => {
+    if (newCategory === category || !initialQuery) return
+
+    void queryClient.prefetchInfiniteQuery(
+      queryApi.search.query.infiniteOptions({
+        input: () => ({
+          query: initialQuery,
+          category: newCategory as "general" | "images" | "videos" | "news",
+          page: 1,
+        }),
+        initialPageParam: 1,
+        getNextPageParam: (lastPage, allPages) => {
+          return lastPage.results.length > 0 ? allPages.length + 1 : undefined
+        },
+      }),
+    )
   }
 
   const handleImageClick = (index: number) => {
@@ -189,10 +214,30 @@ const SearchInterface = ({ mode }: SearchInterfaceProps) => {
 
       <Tabs value={category} onValueChange={handleCategoryChange}>
         <TabsList>
-          <TabsTrigger value="general">All</TabsTrigger>
-          <TabsTrigger value="images">Images</TabsTrigger>
-          <TabsTrigger value="videos">Videos</TabsTrigger>
-          <TabsTrigger value="news">News</TabsTrigger>
+          <TabsTrigger
+            value="general"
+            onMouseEnter={() => handleCategoryHover("general")}
+          >
+            All
+          </TabsTrigger>
+          <TabsTrigger
+            value="images"
+            onMouseEnter={() => handleCategoryHover("images")}
+          >
+            Images
+          </TabsTrigger>
+          <TabsTrigger
+            value="videos"
+            onMouseEnter={() => handleCategoryHover("videos")}
+          >
+            Videos
+          </TabsTrigger>
+          <TabsTrigger
+            value="news"
+            onMouseEnter={() => handleCategoryHover("news")}
+          >
+            News
+          </TabsTrigger>
         </TabsList>
 
         <div className="mt-6">

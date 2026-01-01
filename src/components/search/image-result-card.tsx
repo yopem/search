@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Image from "next/image"
 
 interface ImageResult {
   title: string
@@ -51,14 +52,16 @@ const ImageResultCard = ({ result, onImageClick }: ImageResultCardProps) => {
         flex: `${aspectRatio * 200} 1 ${ROW_HEIGHT * aspectRatio}px`,
       }}
     >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
+      <Image
         src={imageUrl}
         alt={result.title}
-        className={`h-full w-full object-cover transition-all duration-300 group-hover:scale-105 ${
+        fill
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+        className={`object-cover transition-all duration-300 group-hover:scale-105 ${
           imageLoaded ? "opacity-100" : "opacity-0"
         }`}
         loading="lazy"
+        unoptimized
         onLoad={(e) => {
           const img = e.target as HTMLImageElement
           const ratio = img.naturalWidth / img.naturalHeight

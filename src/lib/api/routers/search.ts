@@ -52,6 +52,7 @@ export const searchRouter = {
   query: publicProcedure
     .input(searchInputSchema)
     .handler(async ({ input, context }) => {
+      const startTime = Date.now()
       const { query, category, page } = input
 
       try {
@@ -96,12 +97,17 @@ export const searchRouter = {
           }
         }
 
+        const responseTime = Date.now() - startTime
+
         return {
           query: data.query,
           results: data.results,
           totalResults: data.number_of_results,
           suggestions: data.suggestions ?? [],
           page,
+          _meta: {
+            responseTime,
+          },
         }
       } catch (error) {
         if (error instanceof ORPCError) {

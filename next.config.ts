@@ -7,7 +7,7 @@ const config: NextConfig = {
   serverExternalPackages: ["pg", "pg-pool", "pg-native"],
   reactCompiler: true,
   reactStrictMode: true,
-  // cacheComponents: true,
+  compress: true,
   typescript: { ignoreBuildErrors: true },
   productionBrowserSourceMaps: false,
   compiler: {
