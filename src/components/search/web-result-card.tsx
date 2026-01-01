@@ -26,16 +26,16 @@ const WebResultCard = ({ result }: { result: WebResult }) => {
 
   return (
     <Card className="hover:bg-accent/50 transition-colors">
-      <CardHeader className="p-4">
+      <CardHeader className="p-3">
         <div className="flex items-start justify-between gap-2">
-          <div className="flex-1 space-y-1.5">
+          <div className="flex-1 space-y-1">
             <a
               href={result.url}
               target="_blank"
               rel="noopener noreferrer"
               className="group"
             >
-              <CardTitle className="text-lg leading-tight font-normal group-hover:underline">
+              <CardTitle className="text-base leading-snug font-normal group-hover:underline">
                 {result.title}
               </CardTitle>
             </a>
@@ -44,21 +44,21 @@ const WebResultCard = ({ result }: { result: WebResult }) => {
                 <Image
                   src={faviconUrl}
                   alt={`${displayUrl} favicon`}
-                  width={16}
-                  height={16}
+                  width={14}
+                  height={14}
                   className="rounded-sm"
                   onError={() => setFaviconError(true)}
                   unoptimized
                 />
               ) : (
-                <GlobeIcon className="text-muted-foreground h-3.5 w-3.5" />
+                <GlobeIcon className="text-muted-foreground h-3 w-3" />
               )}
               <span className="text-green-700 dark:text-green-500">
                 {displayUrl}
               </span>
             </div>
             {result.content && (
-              <CardDescription className="line-clamp-3 text-sm leading-relaxed">
+              <CardDescription className="line-clamp-2 text-sm leading-relaxed">
                 {result.content}
               </CardDescription>
             )}

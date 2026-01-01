@@ -10,6 +10,7 @@ import ImageResultCard from "@/components/search/image-result-card"
 import ImageViewer from "@/components/search/image-viewer"
 import CalculatorWidget from "@/components/search/instant-answer-calculator"
 import UnitConverterWidget from "@/components/search/instant-answer-unit-converter"
+import WeatherWidget from "@/components/search/instant-answer-weather"
 import NewsResultCard from "@/components/search/news-result-card"
 import RelatedSearches from "@/components/search/related-searches"
 import SearchAutocomplete from "@/components/search/search-autocomplete"
@@ -91,6 +92,11 @@ const SearchInterface = ({ mode, session }: SearchInterfaceProps) => {
     const unitRegex = /(\d+(?:\.\d+)?)\s*([a-zA-Z]+)\s+(?:to|in)\s+([a-zA-Z]+)/i
     if (unitRegex.test(query)) {
       return { type: "unitConverter", data: query }
+    }
+
+    const weatherRegex = /weather\s+(?:in\s+)?(.+)|(.+)\s+weather/i
+    if (weatherRegex.test(query)) {
+      return { type: "weather", data: query }
     }
 
     return null
@@ -322,6 +328,10 @@ const SearchInterface = ({ mode, session }: SearchInterfaceProps) => {
 
               {instantAnswer?.type === "unitConverter" && (
                 <UnitConverterWidget initialQuery={instantAnswer.data} />
+              )}
+
+              {instantAnswer?.type === "weather" && (
+                <WeatherWidget initialQuery={instantAnswer.data} />
               )}
 
               {error && (
