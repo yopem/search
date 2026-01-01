@@ -34,9 +34,9 @@ const NewsResultCard = ({ result }: { result: NewsResult }) => {
 
   return (
     <Card className="hover:bg-accent/50 transition-colors">
-      <CardHeader className="p-4">
+      <CardHeader className="p-3">
         <div className="flex items-start justify-between gap-2">
-          <div className="flex-1 space-y-1.5">
+          <div className="flex-1 space-y-1">
             <a
               href={result.url}
               target="_blank"
@@ -44,8 +44,8 @@ const NewsResultCard = ({ result }: { result: NewsResult }) => {
               className="group"
             >
               <div className="flex items-center gap-2">
-                <NewspaperIcon className="text-muted-foreground h-3.5 w-3.5 shrink-0" />
-                <CardTitle className="text-lg leading-tight font-normal group-hover:underline">
+                <NewspaperIcon className="text-muted-foreground h-3 w-3 shrink-0" />
+                <CardTitle className="text-base leading-snug font-normal group-hover:underline">
                   {result.title}
                 </CardTitle>
               </div>
@@ -55,14 +55,14 @@ const NewsResultCard = ({ result }: { result: NewsResult }) => {
                 <Image
                   src={faviconUrl}
                   alt={`${displayUrl} favicon`}
-                  width={16}
-                  height={16}
+                  width={14}
+                  height={14}
                   className="rounded-sm"
                   onError={() => setFaviconError(true)}
                   unoptimized
                 />
               ) : (
-                <GlobeIcon className="text-muted-foreground h-3.5 w-3.5" />
+                <GlobeIcon className="text-muted-foreground h-3 w-3" />
               )}
               <span className="text-green-700 dark:text-green-500">
                 {displayUrl}
