@@ -21,6 +21,7 @@ import SearchHeader from "@/components/search/search-header"
 import SearchSkeleton from "@/components/search/search-skeleton"
 import VideoResultCard from "@/components/search/video-result-card"
 import WebResultCard from "@/components/search/web-result-card"
+import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
 import { queryApi } from "@/lib/orpc/query"
 
@@ -76,6 +77,7 @@ const SearchInterface = ({
   const router = useRouter()
   const searchParams = useSearchParams()
   const loadMoreRef = useRef<HTMLDivElement>(null)
+  const pageObserversRef = useRef<IntersectionObserver[]>([])
 
   const initialQuery = mode === "results" ? (searchParams.get("q") ?? "") : ""
 
@@ -84,6 +86,10 @@ const SearchInterface = ({
     null,
   )
   const [isViewerOpen, setIsViewerOpen] = useState(false)
+  const [isInfiniteScrollEnabled, setIsInfiniteScrollEnabled] =
+    useState<boolean>(false)
+
+  const [page, setPage] = useQueryState("page", parseAsString)
 
   const detectInstantAnswer = (
     query: string,
@@ -169,6 +175,24 @@ const SearchInterface = ({
   }, [initialQuery, mode])
 
   useEffect(() => {
+    if (mode === "results" && !page) {
+      void setPage("1")
+    }
+  }, [mode, page, setPage])
+
+  useEffect(() => {
+    if (category === "images") {
+      setIsInfiniteScrollEnabled(true)
+    } else {
+      setIsInfiniteScrollEnabled(false)
+    }
+  }, [initialQuery, category])
+
+  useEffect(() => {
+    if (!isInfiniteScrollEnabled) {
+      return
+    }
+
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
@@ -188,7 +212,47 @@ const SearchInterface = ({
         observer.unobserve(currentRef)
       }
     }
-  }, [fetchNextPage, hasNextPage, isFetchingNextPage])
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage, isInfiniteScrollEnabled])
+
+  useEffect(() => {
+    if (!data?.pages || mode !== "results") {
+      return
+    }
+
+    pageObserversRef.current.forEach((observer) => observer.disconnect())
+    pageObserversRef.current = []
+
+    const timeout = setTimeout(() => {
+      data.pages.forEach((_, pageIndex) => {
+        const pageNumber = pageIndex + 1
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting && entry.intersectionRatio > 0.1) {
+                void setPage(pageNumber.toString())
+              }
+            })
+          },
+          { threshold: [0.1, 0.3, 0.5], rootMargin: "-100px 0px -100px 0px" },
+        )
+
+        const pageElement = document.querySelector(
+          `[data-page="${pageNumber}"]`,
+        )
+
+        if (pageElement) {
+          observer.observe(pageElement)
+          pageObserversRef.current.push(observer)
+        }
+      })
+    }, 100)
+
+    return () => {
+      clearTimeout(timeout)
+      pageObserversRef.current.forEach((observer) => observer.disconnect())
+      pageObserversRef.current = []
+    }
+  }, [data?.pages, mode, setPage])
 
   const queryClient = useQueryClient()
 
@@ -447,79 +511,146 @@ const SearchInterface = ({
                     aria-busy={isFetchingNextPage}
                     aria-label={`Search results for ${initialQuery}`}
                   >
-                    {category === "general" && (
-                      <div className="space-y-4">
-                        {allResults.map(
-                          (result: SearchResult, index: number) => (
-                            <article
-                              key={index}
-                              aria-posinset={index + 1}
-                              aria-setsize={allResults.length}
-                            >
-                              <WebResultCard
-                                result={result}
-                                openInNewTab={openInNewTab}
-                              />
-                            </article>
-                          ),
-                        )}
-                      </div>
-                    )}
+                    {category === "general" &&
+                      data?.pages.map((pageData, pageIndex) => (
+                        <div
+                          key={pageIndex}
+                          data-page={pageIndex + 1}
+                          className="mb-4 space-y-4 last:mb-0"
+                        >
+                          {pageData.results.map(
+                            (result: SearchResult, resultIndex: number) => {
+                              const globalIndex =
+                                pageIndex *
+                                  (data.pages[0]?.results.length || 10) +
+                                resultIndex
+                              return (
+                                <article
+                                  key={globalIndex}
+                                  aria-posinset={globalIndex + 1}
+                                  aria-setsize={allResults.length}
+                                >
+                                  <WebResultCard
+                                    result={result}
+                                    openInNewTab={openInNewTab}
+                                  />
+                                </article>
+                              )
+                            },
+                          )}
+                        </div>
+                      ))}
 
-                    {category === "images" && (
-                      <div className="flex flex-wrap gap-2 after:flex-auto after:content-['']">
-                        {allResults.map(
-                          (result: SearchResult, index: number) => (
-                            <ImageResultCard
-                              key={index}
-                              result={result}
-                              onImageClick={() => handleImageClick(index)}
-                            />
-                          ),
-                        )}
-                      </div>
-                    )}
+                    {category === "images" &&
+                      data?.pages.map((pageData, pageIndex) => (
+                        <div
+                          key={pageIndex}
+                          data-page={pageIndex + 1}
+                          className="mb-2 flex flex-wrap gap-2 after:flex-auto after:content-[''] last:mb-0"
+                        >
+                          {pageData.results.map(
+                            (result: SearchResult, resultIndex: number) => {
+                              const globalIndex =
+                                pageIndex *
+                                  (data.pages[0]?.results.length || 10) +
+                                resultIndex
+                              return (
+                                <ImageResultCard
+                                  key={globalIndex}
+                                  result={result}
+                                  onImageClick={() =>
+                                    handleImageClick(globalIndex)
+                                  }
+                                />
+                              )
+                            },
+                          )}
+                        </div>
+                      ))}
 
-                    {category === "videos" && (
-                      <div className="space-y-4">
-                        {allResults.map(
-                          (result: SearchResult, index: number) => (
-                            <article
-                              key={index}
-                              aria-posinset={index + 1}
-                              aria-setsize={allResults.length}
-                            >
-                              <VideoResultCard
-                                result={result}
-                                openInNewTab={openInNewTab}
-                              />
-                            </article>
-                          ),
-                        )}
-                      </div>
-                    )}
+                    {category === "videos" &&
+                      data?.pages.map((pageData, pageIndex) => (
+                        <div
+                          key={pageIndex}
+                          data-page={pageIndex + 1}
+                          className="mb-4 space-y-4 last:mb-0"
+                        >
+                          {pageData.results.map(
+                            (result: SearchResult, resultIndex: number) => {
+                              const globalIndex =
+                                pageIndex *
+                                  (data.pages[0]?.results.length || 10) +
+                                resultIndex
+                              return (
+                                <article
+                                  key={globalIndex}
+                                  aria-posinset={globalIndex + 1}
+                                  aria-setsize={allResults.length}
+                                >
+                                  <VideoResultCard
+                                    result={result}
+                                    openInNewTab={openInNewTab}
+                                  />
+                                </article>
+                              )
+                            },
+                          )}
+                        </div>
+                      ))}
 
-                    {category === "news" && (
-                      <div className="space-y-4">
-                        {allResults.map(
-                          (result: SearchResult, index: number) => (
-                            <article
-                              key={index}
-                              aria-posinset={index + 1}
-                              aria-setsize={allResults.length}
-                            >
-                              <NewsResultCard
-                                result={result}
-                                openInNewTab={openInNewTab}
-                              />
-                            </article>
-                          ),
-                        )}
-                      </div>
-                    )}
+                    {category === "news" &&
+                      data?.pages.map((pageData, pageIndex) => (
+                        <div
+                          key={pageIndex}
+                          data-page={pageIndex + 1}
+                          className="mb-4 space-y-4 last:mb-0"
+                        >
+                          {pageData.results.map(
+                            (result: SearchResult, resultIndex: number) => {
+                              const globalIndex =
+                                pageIndex *
+                                  (data.pages[0]?.results.length || 10) +
+                                resultIndex
+                              return (
+                                <article
+                                  key={globalIndex}
+                                  aria-posinset={globalIndex + 1}
+                                  aria-setsize={allResults.length}
+                                >
+                                  <NewsResultCard
+                                    result={result}
+                                    openInNewTab={openInNewTab}
+                                  />
+                                </article>
+                              )
+                            },
+                          )}
+                        </div>
+                      ))}
                   </div>
 
-                  {isFetchingNextPage && (
+                  {!isInfiniteScrollEnabled && hasNextPage && (
+                    <div className="flex justify-center py-8">
+                      <Button
+                        onClick={() => {
+                          void fetchNextPage()
+                          setIsInfiniteScrollEnabled(true)
+                        }}
+                        disabled={isFetchingNextPage}
+                      >
+                        {isFetchingNextPage ? (
+                          <>
+                            <Spinner className="h-4 w-4" />
+                            <span className="ml-2">Loading...</span>
+                          </>
+                        ) : (
+                          "Load More"
+                        )}
+                      </Button>
+                    </div>
+                  )}
+
+                  {isFetchingNextPage && isInfiniteScrollEnabled && (
                     <div
                       className="flex justify-center py-8"
                       aria-live="polite"

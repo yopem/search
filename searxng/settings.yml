@@ -24,3 +24,9 @@ outgoing:
 engines:
   - name: wolframalpha
     disabled: false
+  - name: bing
+    disabled: false
+  - name: yahoo
+    disabled: false
+  - name: yandex
+    disabled: false

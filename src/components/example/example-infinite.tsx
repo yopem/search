@@ -1,11 +1,16 @@
 "use client"
 
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useInfiniteQuery } from "@tanstack/react-query"
 
+import { Button } from "@/components/ui/button"
+import { Spinner } from "@/components/ui/spinner"
 import { queryApi } from "@/lib/orpc/query"
 
 const ExampleInfite = () => {
+  const [isInfiniteScrollEnabled, setIsInfiniteScrollEnabled] =
+    useState<boolean>(false)
+
   const {
     data: examples,
     isError,
@@ -23,6 +28,10 @@ const ExampleInfite = () => {
   const loadMoreRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    if (!isInfiniteScrollEnabled) {
+      return
+    }
+
     const observer = new IntersectionObserver(
       (entries) => {
         const first = entries[0]
@@ -43,7 +52,7 @@ const ExampleInfite = () => {
         observer.unobserve(currentRef)
       }
     }
-  }, [fetchNextPage, hasNextPage, isFetchingNextPage])
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage, isInfiniteScrollEnabled])
 
   if (isError) {
     return <p>Something went wrong</p>
@@ -63,9 +72,33 @@ const ExampleInfite = () => {
             ))}
           </div>
 
-          {isFetchingNextPage && (
+          {!isInfiniteScrollEnabled && hasNextPage && (
             <div className="flex justify-center py-4">
-              <div className="text-sm text-gray-500">Loading more...</div>
+              <Button
+                onClick={() => {
+                  void fetchNextPage()
+                  setIsInfiniteScrollEnabled(true)
+                }}
+                disabled={isFetchingNextPage}
+              >
+                {isFetchingNextPage ? (
+                  <>
+                    <Spinner className="h-4 w-4" />
+                    <span className="ml-2">Loading...</span>
+                  </>
+                ) : (
+                  "Load More"
+                )}
+              </Button>
+            </div>
+          )}
+
+          {isFetchingNextPage && isInfiniteScrollEnabled && (
+            <div className="flex justify-center py-4">
+              <Spinner className="h-4 w-4" />
+              <span className="ml-2 text-sm text-gray-500">
+                Loading more...
+              </span>
             </div>
           )}
 
