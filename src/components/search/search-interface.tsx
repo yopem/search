@@ -7,6 +7,7 @@ import { parseAsStringLiteral, useQueryState } from "nuqs"
 
 import Logo from "@/components/logo"
 import ImageResultCard from "@/components/search/image-result-card"
+import ImageViewer from "@/components/search/image-viewer"
 import NewsResultCard from "@/components/search/news-result-card"
 import SearchAutocomplete from "@/components/search/search-autocomplete"
 import SearchEmpty from "@/components/search/search-empty"
@@ -30,6 +31,9 @@ interface SearchResult {
   iframe_src?: string
   duration?: string
   engine?: string
+  resolution?: string
+  img_format?: string
+  source?: string
 }
 
 interface SearchInterfaceProps {
@@ -44,6 +48,10 @@ const SearchInterface = ({ mode }: SearchInterfaceProps) => {
   const initialQuery = mode === "results" ? (searchParams.get("q") ?? "") : ""
 
   const [query, setQuery] = useState("")
+  const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(
+    null,
+  )
+  const [isViewerOpen, setIsViewerOpen] = useState(false)
 
   const [category, setCategory] = useQueryState(
     "category",
@@ -113,6 +121,31 @@ const SearchInterface = ({ mode }: SearchInterfaceProps) => {
 
   const handleCategoryChange = (newCategory: string) => {
     void setCategory(newCategory as "general" | "images" | "videos" | "news")
+  }
+
+  const handleImageClick = (index: number) => {
+    setSelectedImageIndex(index)
+    setIsViewerOpen(true)
+  }
+
+  const handleNext = () => {
+    if (
+      selectedImageIndex !== null &&
+      selectedImageIndex < allResults.length - 1
+    ) {
+      setSelectedImageIndex(selectedImageIndex + 1)
+    }
+  }
+
+  const handlePrevious = () => {
+    if (selectedImageIndex !== null && selectedImageIndex > 0) {
+      setSelectedImageIndex(selectedImageIndex - 1)
+    }
+  }
+
+  const handleClose = () => {
+    setIsViewerOpen(false)
+    setSelectedImageIndex(null)
   }
 
   if (mode === "home") {
@@ -198,7 +231,11 @@ const SearchInterface = ({ mode }: SearchInterfaceProps) => {
                 <TabsContent value="images">
                   <div className="flex flex-wrap gap-2 after:flex-auto after:content-['']">
                     {allResults.map((result: SearchResult, index: number) => (
-                      <ImageResultCard key={index} result={result} />
+                      <ImageResultCard
+                        key={index}
+                        result={result}
+                        onImageClick={() => handleImageClick(index)}
+                      />
                     ))}
                   </div>
                 </TabsContent>
@@ -257,6 +294,18 @@ const SearchInterface = ({ mode }: SearchInterfaceProps) => {
           )}
         </div>
       </Tabs>
+
+      {selectedImageIndex !== null && (
+        <ImageViewer
+          isOpen={isViewerOpen}
+          onClose={handleClose}
+          currentIndex={selectedImageIndex}
+          totalImages={allResults.length}
+          image={allResults[selectedImageIndex]}
+          onNext={handleNext}
+          onPrevious={handlePrevious}
+        />
+      )}
     </div>
   )
 }

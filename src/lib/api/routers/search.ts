@@ -34,6 +34,9 @@ interface SearxngResult {
   iframe_src?: string
   duration?: string
   engine?: string
+  resolution?: string
+  img_format?: string
+  source?: string
 }
 
 interface SearxngResponse {

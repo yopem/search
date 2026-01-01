@@ -10,7 +10,12 @@ interface ImageResult {
   thumbnail_src?: string
 }
 
-const ImageResultCard = ({ result }: { result: ImageResult }) => {
+interface ImageResultCardProps {
+  result: ImageResult
+  onImageClick?: () => void
+}
+
+const ImageResultCard = ({ result, onImageClick }: ImageResultCardProps) => {
   const [imageError, setImageError] = useState(false)
   const [imageLoaded, setImageLoaded] = useState(false)
   const [aspectRatio, setAspectRatio] = useState(1)
@@ -38,11 +43,9 @@ const ImageResultCard = ({ result }: { result: ImageResult }) => {
   const ROW_HEIGHT = 200
 
   return (
-    <a
-      href={result.url}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="bg-muted group relative block overflow-hidden rounded-lg"
+    <button
+      onClick={onImageClick}
+      className="bg-muted group relative block cursor-pointer overflow-hidden rounded-lg"
       style={{
         height: `${ROW_HEIGHT}px`,
         flex: `${aspectRatio * 200} 1 ${ROW_HEIGHT * aspectRatio}px`,
@@ -80,7 +83,7 @@ const ImageResultCard = ({ result }: { result: ImageResult }) => {
           </p>
         )}
       </div>
-    </a>
+    </button>
   )
 }
 
