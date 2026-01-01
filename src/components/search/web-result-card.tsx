@@ -26,20 +26,20 @@ const WebResultCard = ({ result }: { result: WebResult }) => {
 
   return (
     <Card className="hover:bg-accent/50 transition-colors">
-      <CardHeader>
+      <CardHeader className="p-4">
         <div className="flex items-start justify-between gap-2">
-          <div className="flex-1 space-y-1">
+          <div className="flex-1 space-y-1.5">
             <a
               href={result.url}
               target="_blank"
               rel="noopener noreferrer"
               className="group"
             >
-              <CardTitle className="text-base group-hover:underline">
+              <CardTitle className="text-lg leading-tight font-normal group-hover:underline">
                 {result.title}
               </CardTitle>
             </a>
-            <div className="text-muted-foreground flex items-center gap-2 text-xs">
+            <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
               {!faviconError ? (
                 <Image
                   src={faviconUrl}
@@ -51,17 +51,19 @@ const WebResultCard = ({ result }: { result: WebResult }) => {
                   unoptimized
                 />
               ) : (
-                <GlobeIcon className="text-muted-foreground h-4 w-4" />
+                <GlobeIcon className="text-muted-foreground h-3.5 w-3.5" />
               )}
-              <span>{displayUrl}</span>
+              <span className="text-green-700 dark:text-green-500">
+                {displayUrl}
+              </span>
             </div>
             {result.content && (
-              <CardDescription className="text-sm">
+              <CardDescription className="line-clamp-3 text-sm leading-relaxed">
                 {result.content}
               </CardDescription>
             )}
           </div>
-          <ExternalLinkIcon className="text-muted-foreground h-4 w-4" />
+          <ExternalLinkIcon className="text-muted-foreground h-3.5 w-3.5 shrink-0" />
         </div>
       </CardHeader>
     </Card>

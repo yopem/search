@@ -3,7 +3,28 @@
 import { Card, CardHeader } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 
-const SearchSkeleton = () => {
+interface SearchSkeletonProps {
+  category?: "general" | "images" | "videos" | "news"
+}
+
+const SearchSkeleton = ({ category = "general" }: SearchSkeletonProps) => {
+  if (category === "images") {
+    return (
+      <div className="flex flex-wrap gap-2">
+        {Array.from({ length: 20 }).map((_, i) => (
+          <Skeleton
+            key={i}
+            className="rounded-lg"
+            style={{
+              height: "200px",
+              flex: `${1 + Math.random()} 1 ${200 * (1 + Math.random())}px`,
+            }}
+          />
+        ))}
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-4">
       {Array.from({ length: 5 }).map((_, i) => (

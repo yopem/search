@@ -1,0 +1,135 @@
+"use client"
+
+import { FilterIcon as FilterXIcon } from "lucide-react"
+
+import { Button } from "@/components/ui/button"
+import { Menu, MenuItem, MenuPopup, MenuTrigger } from "@/components/ui/menu"
+
+interface SearchFiltersProps {
+  timeRange: string
+  region: string
+  safeSearch: string
+  onTimeRangeChange: (value: string) => void
+  onRegionChange: (value: string) => void
+  onSafeSearchChange: (value: string) => void
+  onClearFilters: () => void
+}
+
+const TIME_RANGES = [
+  { value: "", label: "Any time" },
+  { value: "day", label: "Past day" },
+  { value: "week", label: "Past week" },
+  { value: "month", label: "Past month" },
+  { value: "year", label: "Past year" },
+]
+
+const REGIONS = [
+  { value: "", label: "Auto" },
+  { value: "en-US", label: "United States" },
+  { value: "en-GB", label: "United Kingdom" },
+  { value: "de-DE", label: "Germany" },
+  { value: "fr-FR", label: "France" },
+  { value: "ja-JP", label: "Japan" },
+  { value: "es-ES", label: "Spain" },
+  { value: "pt-BR", label: "Brazil" },
+]
+
+const SAFE_SEARCH_OPTIONS = [
+  { value: "0", label: "Off" },
+  { value: "1", label: "Moderate" },
+  { value: "2", label: "Strict" },
+]
+
+const SearchFilters = ({
+  timeRange,
+  region,
+  safeSearch,
+  onTimeRangeChange,
+  onRegionChange,
+  onSafeSearchChange,
+  onClearFilters,
+}: SearchFiltersProps) => {
+  const hasActiveFilters =
+    timeRange !== "" || region !== "" || safeSearch !== "1"
+
+  return (
+    <div className="flex flex-wrap items-center gap-2 py-3">
+      <Menu>
+        <MenuTrigger
+          render={
+            <Button variant="outline" size="sm">
+              {REGIONS.find((r) => r.value === region)?.label ?? "Auto"}
+            </Button>
+          }
+        />
+        <MenuPopup>
+          {TIME_RANGES.map((option) => (
+            <MenuItem
+              key={option.value}
+              onClick={() => onTimeRangeChange(option.value)}
+            >
+              {option.label}
+            </MenuItem>
+          ))}
+        </MenuPopup>
+      </Menu>
+
+      <Menu>
+        <MenuTrigger
+          render={
+            <Button variant="outline" size="sm">
+              {TIME_RANGES.find((t) => t.value === timeRange)?.label ??
+                "Any time"}
+            </Button>
+          }
+        />
+        <MenuPopup>
+          {REGIONS.map((option) => (
+            <MenuItem
+              key={option.value}
+              onClick={() => onRegionChange(option.value)}
+            >
+              {option.label}
+            </MenuItem>
+          ))}
+        </MenuPopup>
+      </Menu>
+
+      <Menu>
+        <MenuTrigger
+          render={
+            <Button variant="outline" size="sm">
+              Safe:{" "}
+              {SAFE_SEARCH_OPTIONS.find((s) => s.value === safeSearch)?.label ??
+                "Moderate"}
+            </Button>
+          }
+        />
+        <MenuPopup>
+          {SAFE_SEARCH_OPTIONS.map((option) => (
+            <MenuItem
+              key={option.value}
+              onClick={() => onSafeSearchChange(option.value)}
+            >
+              {option.label}
+            </MenuItem>
+          ))}
+        </MenuPopup>
+      </Menu>
+
+      {hasActiveFilters && (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onClearFilters}
+          className="text-muted-foreground"
+        >
+          <FilterXIcon className="mr-1 h-3.5 w-3.5" />
+          Clear filters
+        </Button>
+      )}
+    </div>
+  )
+}
+
+export default SearchFilters

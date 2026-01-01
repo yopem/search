@@ -3,20 +3,24 @@
 import { useEffect, useRef, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query"
-import { parseAsStringLiteral, useQueryState } from "nuqs"
+import { parseAsString, parseAsStringLiteral, useQueryState } from "nuqs"
 
 import Logo from "@/components/logo"
 import ImageResultCard from "@/components/search/image-result-card"
 import ImageViewer from "@/components/search/image-viewer"
+import CalculatorWidget from "@/components/search/instant-answer-calculator"
+import UnitConverterWidget from "@/components/search/instant-answer-unit-converter"
 import NewsResultCard from "@/components/search/news-result-card"
+import RelatedSearches from "@/components/search/related-searches"
 import SearchAutocomplete from "@/components/search/search-autocomplete"
 import SearchEmpty from "@/components/search/search-empty"
 import SearchError from "@/components/search/search-error"
+import SearchFilters from "@/components/search/search-filters"
+import SearchHeader from "@/components/search/search-header"
 import SearchSkeleton from "@/components/search/search-skeleton"
 import VideoResultCard from "@/components/search/video-result-card"
 import WebResultCard from "@/components/search/web-result-card"
 import { Spinner } from "@/components/ui/spinner"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { queryApi } from "@/lib/orpc/query"
 
 interface SearchResult {
@@ -38,9 +42,31 @@ interface SearchResult {
 
 interface SearchInterfaceProps {
   mode: "home" | "results"
+  session?: {
+    id: string
+    email: string
+    name: string | null
+  } | null
 }
 
-const SearchInterface = ({ mode }: SearchInterfaceProps) => {
+const BANG_MAPPINGS: Record<string, string> = {
+  g: "https://www.google.com/search?q=",
+  gh: "https://github.com/search?q=",
+  so: "https://stackoverflow.com/search?q=",
+  w: "https://en.wikipedia.org/wiki/Special:Search?search=",
+  yt: "https://www.youtube.com/results?search_query=",
+  a: "https://www.amazon.com/s?k=",
+  r: "https://www.reddit.com/search?q=",
+  tw: "https://twitter.com/search?q=",
+  mdn: "https://developer.mozilla.org/en-US/search?q=",
+  npm: "https://www.npmjs.com/search?q=",
+  py: "https://docs.python.org/3/search.html?q=",
+  wiki: "https://en.wikipedia.org/wiki/Special:Search?search=",
+  imdb: "https://www.imdb.com/find?q=",
+  maps: "https://www.google.com/maps/search/",
+}
+
+const SearchInterface = ({ mode, session }: SearchInterfaceProps) => {
   const router = useRouter()
   const searchParams = useSearchParams()
   const loadMoreRef = useRef<HTMLDivElement>(null)
@@ -53,6 +79,26 @@ const SearchInterface = ({ mode }: SearchInterfaceProps) => {
   )
   const [isViewerOpen, setIsViewerOpen] = useState(false)
 
+  const detectInstantAnswer = (
+    query: string,
+  ): { type: string; data: string } | null => {
+    const mathRegex = /^[\d+\-*/().\s^]+$/
+    const advancedMathRegex = /(sqrt|pow|sin|cos|tan|log)\(/
+    if (mathRegex.test(query) || advancedMathRegex.test(query)) {
+      return { type: "calculator", data: query }
+    }
+
+    const unitRegex = /(\d+(?:\.\d+)?)\s*([a-zA-Z]+)\s+(?:to|in)\s+([a-zA-Z]+)/i
+    if (unitRegex.test(query)) {
+      return { type: "unitConverter", data: query }
+    }
+
+    return null
+  }
+
+  const instantAnswer =
+    mode === "results" ? detectInstantAnswer(initialQuery) : null
+
   const [category, setCategory] = useQueryState(
     "category",
     parseAsStringLiteral(["general", "images", "videos", "news"] as const)
@@ -60,6 +106,21 @@ const SearchInterface = ({ mode }: SearchInterfaceProps) => {
       .withOptions({
         shallow: false,
       }),
+  )
+
+  const [timeRange, setTimeRange] = useQueryState(
+    "timeRange",
+    parseAsString.withDefault(""),
+  )
+
+  const [region, setRegion] = useQueryState(
+    "region",
+    parseAsString.withDefault(""),
+  )
+
+  const [safeSearch, setSafeSearch] = useQueryState(
+    "safeSearch",
+    parseAsString.withDefault("1"),
   )
 
   const {
@@ -76,6 +137,9 @@ const SearchInterface = ({ mode }: SearchInterfaceProps) => {
         query: initialQuery || "placeholder",
         category,
         page: pageParam,
+        timeRange: timeRange || undefined,
+        region: region || undefined,
+        safeSearch: safeSearch || undefined,
       }),
       initialPageParam: 1,
       getNextPageParam: (lastPage, allPages) => {
@@ -111,8 +175,30 @@ const SearchInterface = ({ mode }: SearchInterfaceProps) => {
 
   const queryClient = useQueryClient()
 
+  const detectAndHandleBang = (searchQuery: string): boolean => {
+    const trimmedQuery = searchQuery.trim()
+    const bangRegex = /^!(\w+)\s+(.+)/
+    const bangMatch = bangRegex.exec(trimmedQuery)
+
+    if (bangMatch) {
+      const [, bang, query] = bangMatch
+      const baseUrl = BANG_MAPPINGS[bang]
+
+      if (baseUrl) {
+        window.location.href = baseUrl + encodeURIComponent(query)
+        return true
+      }
+    }
+
+    return false
+  }
+
   const handleSearch = () => {
     if (!query.trim()) return
+
+    if (detectAndHandleBang(query)) {
+      return
+    }
 
     void queryClient.invalidateQueries({
       predicate: (query) =>
@@ -197,148 +283,183 @@ const SearchInterface = ({ mode }: SearchInterfaceProps) => {
   }
 
   return (
-    <div className="container mx-auto max-w-7xl px-4 py-8 pt-20">
-      <form
-        onSubmit={(e) => {
-          e.preventDefault()
-          handleSearch()
-        }}
-        className="mb-8"
-      >
-        <SearchAutocomplete
-          value={query}
-          onChange={setQuery}
-          onSubmit={handleSearch}
-        />
-      </form>
+    <>
+      <SearchHeader
+        query={query}
+        onQueryChange={setQuery}
+        onSearch={handleSearch}
+        category={category}
+        onCategoryChange={handleCategoryChange}
+        onCategoryHover={handleCategoryHover}
+        session={session ?? null}
+      />
 
-      <Tabs value={category} onValueChange={handleCategoryChange}>
-        <TabsList>
-          <TabsTrigger
-            value="general"
-            onMouseEnter={() => handleCategoryHover("general")}
-          >
-            All
-          </TabsTrigger>
-          <TabsTrigger
-            value="images"
-            onMouseEnter={() => handleCategoryHover("images")}
-          >
-            Images
-          </TabsTrigger>
-          <TabsTrigger
-            value="videos"
-            onMouseEnter={() => handleCategoryHover("videos")}
-          >
-            Videos
-          </TabsTrigger>
-          <TabsTrigger
-            value="news"
-            onMouseEnter={() => handleCategoryHover("news")}
-          >
-            News
-          </TabsTrigger>
-        </TabsList>
-
-        <div className="mt-6">
-          {error && (
-            <SearchError
-              message="Failed to fetch search results"
-              onRetry={() => refetch()}
-            />
-          )}
-
-          {isLoading && <SearchSkeleton />}
-
-          {!isLoading && !error && allResults.length === 0 && (
-            <SearchEmpty query={initialQuery} />
-          )}
-
-          {!isLoading && !error && allResults.length > 0 && (
-            <>
-              <div
-                role="feed"
-                aria-busy={isFetchingNextPage}
-                aria-label={`Search results for ${initialQuery}`}
-              >
-                <TabsContent value="general" className="space-y-4">
-                  {allResults.map((result: SearchResult, index: number) => (
-                    <article
-                      key={index}
-                      aria-posinset={index + 1}
-                      aria-setsize={allResults.length}
-                    >
-                      <WebResultCard result={result} />
-                    </article>
-                  ))}
-                </TabsContent>
-
-                <TabsContent value="images">
-                  <div className="flex flex-wrap gap-2 after:flex-auto after:content-['']">
-                    {allResults.map((result: SearchResult, index: number) => (
-                      <ImageResultCard
-                        key={index}
-                        result={result}
-                        onImageClick={() => handleImageClick(index)}
-                      />
-                    ))}
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="videos" className="space-y-4">
-                  {allResults.map((result: SearchResult, index: number) => (
-                    <article
-                      key={index}
-                      aria-posinset={index + 1}
-                      aria-setsize={allResults.length}
-                    >
-                      <VideoResultCard result={result} />
-                    </article>
-                  ))}
-                </TabsContent>
-
-                <TabsContent value="news" className="space-y-4">
-                  {allResults.map((result: SearchResult, index: number) => (
-                    <article
-                      key={index}
-                      aria-posinset={index + 1}
-                      aria-setsize={allResults.length}
-                    >
-                      <NewsResultCard result={result} />
-                    </article>
-                  ))}
-                </TabsContent>
-              </div>
-
-              {isFetchingNextPage && (
-                <div
-                  className="flex justify-center py-8"
-                  aria-live="polite"
-                  aria-busy="true"
-                >
-                  <Spinner className="h-6 w-6" />
-                  <span className="text-muted-foreground ml-2">
-                    Loading more results...
-                  </span>
-                </div>
-              )}
-
-              <div
-                ref={loadMoreRef}
-                className="h-20 w-full"
-                aria-live="polite"
-                aria-busy={isFetchingNextPage}
+      <div className="pt-[120px]">
+        <div className="container mx-auto px-4">
+          <div className="flex gap-8">
+            <div
+              className={
+                category === "images" ? "w-full" : "w-full max-w-[650px]"
+              }
+            >
+              <SearchFilters
+                timeRange={timeRange}
+                region={region}
+                safeSearch={safeSearch}
+                onTimeRangeChange={(value) => void setTimeRange(value)}
+                onRegionChange={(value) => void setRegion(value)}
+                onSafeSearchChange={(value) => void setSafeSearch(value)}
+                onClearFilters={() => {
+                  void setTimeRange("")
+                  void setRegion("")
+                  void setSafeSearch("1")
+                }}
               />
 
-              {!hasNextPage && allResults.length > 0 && (
-                <div className="flex justify-center py-8">
-                  <span className="text-muted-foreground">No more results</span>
-                </div>
+              {instantAnswer?.type === "calculator" && (
+                <CalculatorWidget initialExpression={instantAnswer.data} />
               )}
-            </>
-          )}
+
+              {instantAnswer?.type === "unitConverter" && (
+                <UnitConverterWidget initialQuery={instantAnswer.data} />
+              )}
+
+              {error && (
+                <SearchError
+                  message="Failed to fetch search results"
+                  onRetry={() => refetch()}
+                />
+              )}
+
+              {isLoading && <SearchSkeleton category={category} />}
+
+              {!isLoading && !error && allResults.length === 0 && (
+                <SearchEmpty query={initialQuery} />
+              )}
+
+              {!isLoading && !error && allResults.length > 0 && (
+                <>
+                  <div
+                    role="feed"
+                    aria-busy={isFetchingNextPage}
+                    aria-label={`Search results for ${initialQuery}`}
+                  >
+                    {category === "general" && (
+                      <div className="space-y-4">
+                        {allResults.map(
+                          (result: SearchResult, index: number) => (
+                            <article
+                              key={index}
+                              aria-posinset={index + 1}
+                              aria-setsize={allResults.length}
+                            >
+                              <WebResultCard result={result} />
+                            </article>
+                          ),
+                        )}
+                      </div>
+                    )}
+
+                    {category === "images" && (
+                      <div className="flex flex-wrap gap-2 after:flex-auto after:content-['']">
+                        {allResults.map(
+                          (result: SearchResult, index: number) => (
+                            <ImageResultCard
+                              key={index}
+                              result={result}
+                              onImageClick={() => handleImageClick(index)}
+                            />
+                          ),
+                        )}
+                      </div>
+                    )}
+
+                    {category === "videos" && (
+                      <div className="space-y-4">
+                        {allResults.map(
+                          (result: SearchResult, index: number) => (
+                            <article
+                              key={index}
+                              aria-posinset={index + 1}
+                              aria-setsize={allResults.length}
+                            >
+                              <VideoResultCard result={result} />
+                            </article>
+                          ),
+                        )}
+                      </div>
+                    )}
+
+                    {category === "news" && (
+                      <div className="space-y-4">
+                        {allResults.map(
+                          (result: SearchResult, index: number) => (
+                            <article
+                              key={index}
+                              aria-posinset={index + 1}
+                              aria-setsize={allResults.length}
+                            >
+                              <NewsResultCard result={result} />
+                            </article>
+                          ),
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {isFetchingNextPage && (
+                    <div
+                      className="flex justify-center py-8"
+                      aria-live="polite"
+                      aria-busy="true"
+                    >
+                      <Spinner className="h-6 w-6" />
+                      <span className="text-muted-foreground ml-2">
+                        Loading more results...
+                      </span>
+                    </div>
+                  )}
+
+                  <div
+                    ref={loadMoreRef}
+                    className="h-20 w-full"
+                    aria-live="polite"
+                    aria-busy={isFetchingNextPage}
+                  />
+
+                  {!hasNextPage && allResults.length > 0 && (
+                    <div className="flex justify-center py-8">
+                      <span className="text-muted-foreground">
+                        No more results
+                      </span>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+
+            {category !== "images" && (
+              <div className="hidden flex-1 lg:block">
+                {!isLoading &&
+                  !error &&
+                  allResults.length > 0 &&
+                  !hasNextPage && (
+                    <div className="sticky top-[140px]">
+                      <RelatedSearches
+                        query={initialQuery}
+                        category={category}
+                      />
+                    </div>
+                  )}
+              </div>
+            )}
+
+            {category === "images" && (
+              <div className="hidden flex-1 lg:block" />
+            )}
+          </div>
         </div>
-      </Tabs>
+      </div>
 
       {selectedImageIndex !== null && (
         <ImageViewer
@@ -351,7 +472,7 @@ const SearchInterface = ({ mode }: SearchInterfaceProps) => {
           onPrevious={handlePrevious}
         />
       )}
-    </div>
+    </>
   )
 }
 

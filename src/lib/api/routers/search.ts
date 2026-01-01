@@ -8,7 +8,7 @@ import {
   searchHistoryTable,
   userSettingsTable,
 } from "@/lib/db/schema"
-import { searxngUrl } from "@/lib/env/server"
+import { searxngUrl, weatherApiKey } from "@/lib/env/server"
 
 const searchCategorySchema = z.enum(["general", "images", "videos", "news"])
 
@@ -16,6 +16,9 @@ const searchInputSchema = z.object({
   query: z.string().min(1).max(500),
   category: searchCategorySchema.default("general"),
   page: z.number().min(1).default(1),
+  timeRange: z.string().optional(),
+  region: z.string().optional(),
+  safeSearch: z.string().optional(),
 })
 
 const autocompleteInputSchema = z.object({
@@ -53,7 +56,7 @@ export const searchRouter = {
     .input(searchInputSchema)
     .handler(async ({ input, context }) => {
       const startTime = Date.now()
-      const { query, category, page } = input
+      const { query, category, page, timeRange, region, safeSearch } = input
 
       try {
         const params = new URLSearchParams({
@@ -62,6 +65,18 @@ export const searchRouter = {
           categories: category,
           pageno: page.toString(),
         })
+
+        if (timeRange) {
+          params.set("time_range", timeRange)
+        }
+
+        if (region) {
+          params.set("language", region)
+        }
+
+        if (safeSearch) {
+          params.set("safesearch", safeSearch)
+        }
 
         const response = await fetch(`${searxngUrl}/search?${params}`)
 
@@ -221,4 +236,69 @@ export const searchRouter = {
       }
     }),
   },
+
+  weather: publicProcedure
+    .input(z.object({ location: z.string().min(1).max(100) }))
+    .handler(async ({ input }) => {
+      if (!weatherApiKey) {
+        throw new ORPCError("SERVICE_UNAVAILABLE", {
+          message: "Weather service not configured",
+        })
+      }
+
+      try {
+        const params = new URLSearchParams({
+          key: weatherApiKey,
+          q: input.location,
+          days: "5",
+        })
+
+        const response = await fetch(
+          `https://api.weatherapi.com/v1/forecast.json?${params}`,
+        )
+
+        if (!response.ok) {
+          throw new ORPCError("BAD_REQUEST", {
+            message: "Location not found",
+          })
+        }
+
+        const data = await response.json()
+
+        return {
+          location: data.location.name,
+          country: data.location.country,
+          current: {
+            tempC: data.current.temp_c,
+            tempF: data.current.temp_f,
+            condition: data.current.condition.text,
+            humidity: data.current.humidity,
+            windKph: data.current.wind_kph,
+            feelsLikeC: data.current.feelslike_c,
+          },
+          forecast: data.forecast.forecastday.map(
+            (day: {
+              date: string
+              day: {
+                maxtemp_c: number
+                mintemp_c: number
+                condition: { text: string }
+              }
+            }) => ({
+              date: day.date,
+              maxTempC: day.day.maxtemp_c,
+              minTempC: day.day.mintemp_c,
+              condition: day.day.condition.text,
+            }),
+          ),
+        }
+      } catch (error) {
+        if (error instanceof ORPCError) {
+          throw error
+        }
+        throw new ORPCError("INTERNAL_SERVER_ERROR", {
+          message: "Failed to fetch weather data",
+        })
+      }
+    }),
 }

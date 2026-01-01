@@ -1,13 +1,27 @@
+"use client"
+
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 import { LogInIcon } from "lucide-react"
 
 import UserMenu from "@/components/auth/user-menu"
 import Logo from "@/components/logo"
 import { Button } from "@/components/ui/button"
-import { auth } from "@/lib/auth/session"
 
-const SiteHeader = async () => {
-  const session = await auth()
+interface SiteHeaderProps {
+  session: {
+    id: string
+    email: string
+    name: string | null
+  } | null
+}
+
+const SiteHeader = ({ session }: SiteHeaderProps) => {
+  const pathname = usePathname()
+
+  if (pathname.startsWith("/search")) {
+    return null
+  }
 
   return (
     <header className="bg-background/80 fixed top-0 right-0 left-0 z-50 border-b backdrop-blur-sm">
@@ -33,7 +47,7 @@ const SiteHeader = async () => {
               render={<Link href="/auth/login" />}
             >
               <LogInIcon className="size-4" />
-              <span className="sr-only">Sign in</span>
+              <span className="sr-only">Login</span>
             </Button>
           )}
         </div>

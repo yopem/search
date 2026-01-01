@@ -32,6 +32,7 @@ export const env = createEnv({
     R2_REGION: z.string().min(1),
 
     SEARXNG_URL: z.string().min(1),
+    WEATHER_API_KEY: z.string().min(1).optional(),
   },
   client: {
     NEXT_PUBLIC_API_URL: z.string().min(1),

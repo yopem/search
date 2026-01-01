@@ -6,6 +6,7 @@ import localFont from "next/font/local"
 import Providers from "@/components/providers"
 import Scripts from "@/components/scripts"
 import SiteHeader from "@/components/site-header"
+import { auth } from "@/lib/auth/session"
 import { siteDescription, siteTitle } from "@/lib/env/client"
 
 export const metadata: Metadata = {
@@ -58,9 +59,11 @@ const adwaitaMono = localFont({
   variable: "--font-adwaita-mono",
 })
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const session = await auth()
+
   return (
     <html
       lang="en"
@@ -69,7 +72,7 @@ export default function RootLayout({
     >
       <body>
         <Providers>
-          <SiteHeader />
+          <SiteHeader session={session || null} />
           {children}
         </Providers>
         <Scripts />
