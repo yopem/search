@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { SearchIcon } from "lucide-react"
 
@@ -15,6 +15,22 @@ interface SearchAutocompleteProps {
   placeholder?: string
 }
 
+const useDebounce = (value: string, delay: number) => {
+  const [debouncedValue, setDebouncedValue] = useState(value)
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value)
+    }, delay)
+
+    return () => {
+      clearTimeout(handler)
+    }
+  }, [value, delay])
+
+  return debouncedValue
+}
+
 const SearchAutocomplete = ({
   value,
   onChange,
@@ -24,22 +40,28 @@ const SearchAutocomplete = ({
   const [isOpen, setIsOpen] = useState(false)
   const queryClient = useQueryClient()
 
+  const debouncedValue = useDebounce(value, 300)
+
   const { data: suggestions = [], isFetching } = useQuery({
     ...queryApi.search.autocomplete.queryOptions({
-      input: { query: value },
+      input: { query: debouncedValue },
     }),
-    enabled: value.length > 1,
+    enabled: debouncedValue.length > 1,
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
   })
 
+  const filteredSuggestions = useMemo(() => {
+    return suggestions.filter((s) => s.toLowerCase() !== value.toLowerCase())
+  }, [suggestions, value])
+
   useEffect(() => {
-    if (value.length > 1 && suggestions.length > 0 && !isFetching) {
+    if (value.length > 1 && filteredSuggestions.length > 0 && !isFetching) {
       setIsOpen(true)
     } else if (value.length <= 1) {
       setIsOpen(false)
     }
-  }, [value, suggestions, isFetching])
+  }, [value, filteredSuggestions, isFetching])
 
   useEffect(() => {
     return () => {
@@ -79,7 +101,8 @@ const SearchAutocomplete = ({
   }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onChange(e.target.value)
+    const sanitized = e.target.value.slice(0, 500)
+    onChange(sanitized)
   }
 
   const handleBlur = () => {
@@ -87,12 +110,12 @@ const SearchAutocomplete = ({
   }
 
   const handleFocus = () => {
-    if (value.length > 1 && suggestions.length > 0) {
+    if (value.length > 1 && filteredSuggestions.length > 0) {
       setIsOpen(true)
     }
   }
 
-  const showSuggestions = isOpen && suggestions.length > 0
+  const showSuggestions = isOpen && filteredSuggestions.length > 0
 
   return (
     <div className="relative w-full">
@@ -123,7 +146,7 @@ const SearchAutocomplete = ({
         <div className="bg-popover absolute top-full right-0 left-0 z-50 mt-1 rounded-md border shadow-md">
           <ScrollArea className="h-[20vh]">
             <div className="p-1">
-              {suggestions.map((suggestion, index) => (
+              {filteredSuggestions.map((suggestion, index) => (
                 <button
                   key={index}
                   type="button"

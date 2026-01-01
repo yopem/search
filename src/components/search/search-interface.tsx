@@ -200,9 +200,15 @@ const SearchInterface = ({ mode, session }: SearchInterfaceProps) => {
   }
 
   const handleSearch = () => {
-    if (!query.trim()) return
+    const trimmedQuery = query.trim()
 
-    if (detectAndHandleBang(query)) {
+    if (!trimmedQuery) return
+
+    if (trimmedQuery.length > 500) {
+      return
+    }
+
+    if (detectAndHandleBang(trimmedQuery)) {
       return
     }
 
@@ -212,7 +218,7 @@ const SearchInterface = ({ mode, session }: SearchInterfaceProps) => {
     })
 
     const params = new URLSearchParams()
-    params.set("q", query)
+    params.set("q", trimmedQuery)
     params.set("category", category)
     params.set("page", "1")
     router.push(`/search?${params.toString()}`)
@@ -220,6 +226,7 @@ const SearchInterface = ({ mode, session }: SearchInterfaceProps) => {
 
   const handleCategoryChange = (newCategory: string) => {
     void setCategory(newCategory as "general" | "images" | "videos" | "news")
+    window.scrollTo({ top: 0, behavior: "smooth" })
   }
 
   const handleCategoryHover = (newCategory: string) => {
@@ -394,13 +401,16 @@ const SearchInterface = ({ mode, session }: SearchInterfaceProps) => {
                 }}
               />
 
-              {!isLoading && !error && data?.pages[0] && (
-                <div className="text-muted-foreground mb-4 text-sm">
-                  {data.pages[0].totalResults.toLocaleString()} results (
-                  {(data.pages[0]._meta.responseTime / 1000).toFixed(2)}{" "}
-                  seconds)
-                </div>
-              )}
+              {!isLoading &&
+                !error &&
+                allResults.length > 0 &&
+                data?.pages[0] && (
+                  <div className="text-muted-foreground mb-4 text-sm">
+                    {allResults.length.toLocaleString()}+ results (
+                    {(data.pages[0]._meta.responseTime / 1000).toFixed(2)}{" "}
+                    seconds)
+                  </div>
+                )}
 
               {instantAnswer?.type === "calculator" && (
                 <CalculatorWidget initialExpression={instantAnswer.data} />

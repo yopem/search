@@ -23,6 +23,36 @@ const SiteHeader = ({ session }: SiteHeaderProps) => {
     return null
   }
 
+  if (pathname === "/") {
+    return (
+      <header className="bg-background/80 fixed top-0 right-0 left-0 z-50 backdrop-blur-sm">
+        <div className="container mx-auto flex h-14 items-center justify-end px-4">
+          <div className="flex items-center gap-2">
+            {session && (
+              <UserMenu
+                user={{
+                  id: session.id,
+                  email: session.email,
+                  name: session.name ?? undefined,
+                }}
+              />
+            )}
+            {!session && (
+              <Button
+                variant="ghost"
+                size="icon"
+                render={<Link href="/auth/login" />}
+              >
+                <LogInIcon className="size-4" />
+                <span className="sr-only">Login</span>
+              </Button>
+            )}
+          </div>
+        </div>
+      </header>
+    )
+  }
+
   return (
     <header className="bg-background/80 fixed top-0 right-0 left-0 z-50 border-b backdrop-blur-sm">
       <div className="container mx-auto flex h-14 items-center justify-between px-4">
