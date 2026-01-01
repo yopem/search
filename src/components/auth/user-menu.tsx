@@ -57,15 +57,10 @@ const UserMenu = (props: UserMenuProps) => {
   return (
     <Menu>
       <MenuTrigger
-        render={
-          <Button
-            variant="ghost"
-            className="relative size-8 rounded-full p-0 sm:size-8"
-          />
-        }
+        render={<Button variant="ghost" className="size-8 rounded-full p-0" />}
       >
         <div
-          className={`flex size-8 items-center justify-center rounded-full text-sm font-medium text-white ${bgColor}`}
+          className={`flex size-full items-center justify-center rounded-full text-sm font-medium text-white ${bgColor}`}
         >
           {initial}
         </div>
