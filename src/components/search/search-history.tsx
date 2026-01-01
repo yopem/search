@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import Link from "next/link"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { History, Trash2, X } from "lucide-react"
@@ -7,11 +8,22 @@ import { History, Trash2, X } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { queryApi } from "@/lib/orpc/query"
 
 export function SearchHistory() {
   const queryClient = useQueryClient()
+  const [showClearDialog, setShowClearDialog] = useState(false)
 
   const { data: history = [] } = useQuery({
     ...queryApi.search.history.list.queryOptions({
@@ -34,6 +46,7 @@ export function SearchHistory() {
       void queryClient.invalidateQueries({
         queryKey: queryApi.search.history.list.queryKey(),
       })
+      setShowClearDialog(false)
     },
   })
 
@@ -48,15 +61,33 @@ export function SearchHistory() {
           <History className="h-4 w-4" />
           Recent Searches
         </CardTitle>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => clearAllMutation.mutate({})}
-          disabled={clearAllMutation.isPending}
-        >
-          <Trash2 className="mr-2 h-4 w-4" />
-          Clear All
-        </Button>
+        <Dialog open={showClearDialog} onOpenChange={setShowClearDialog}>
+          <DialogTrigger render={<Button variant="ghost" size="sm" />}>
+            <Trash2 className="mr-2 h-4 w-4" />
+            Clear All
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Clear all search history?</DialogTitle>
+              <DialogDescription>
+                This will permanently delete all your search history. This
+                action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <DialogClose render={<Button variant="outline" />}>
+                Cancel
+              </DialogClose>
+              <Button
+                variant="destructive"
+                onClick={() => clearAllMutation.mutate({})}
+                disabled={clearAllMutation.isPending}
+              >
+                {clearAllMutation.isPending ? "Clearing..." : "Clear All"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </CardHeader>
       <CardContent>
         <ScrollArea className="h-[300px]">

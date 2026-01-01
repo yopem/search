@@ -28,6 +28,12 @@ export const createORPCLink = (
       }),
     interceptors: [
       onError((error) => {
+        if (
+          error instanceof Error &&
+          (error.name === "AbortError" || error.message.includes("abort"))
+        ) {
+          return
+        }
         console.error(error)
       }),
     ],

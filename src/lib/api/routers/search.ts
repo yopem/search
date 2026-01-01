@@ -3,7 +3,11 @@ import { desc, eq } from "drizzle-orm"
 import z from "zod"
 
 import { protectedProcedure, publicProcedure } from "@/lib/api/orpc"
-import { insertSearchHistorySchema, searchHistoryTable } from "@/lib/db/schema"
+import {
+  insertSearchHistorySchema,
+  searchHistoryTable,
+  userSettingsTable,
+} from "@/lib/db/schema"
 import { searxngUrl } from "@/lib/env/server"
 
 const searchCategorySchema = z.enum(["general", "images", "videos", "news"])
@@ -70,12 +74,23 @@ export const searchRouter = {
           typeof context.session === "object" &&
           "id" in context.session
         ) {
-          await context.db.insert(searchHistoryTable).values({
-            userId: context.session.id,
-            query,
-            category,
-            resultCount: data.number_of_results,
-          })
+          const settings = await context.db
+            .select()
+            .from(userSettingsTable)
+            .where(eq(userSettingsTable.userId, context.session.id))
+            .limit(1)
+
+          const shouldSaveHistory =
+            settings.length === 0 || settings[0].showSearchHistory
+
+          if (shouldSaveHistory) {
+            await context.db.insert(searchHistoryTable).values({
+              userId: context.session.id,
+              query,
+              category,
+              resultCount: data.number_of_results,
+            })
+          }
         }
 
         return {

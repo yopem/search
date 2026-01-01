@@ -1,10 +1,11 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { Search } from "lucide-react"
 
 import { Input } from "@/components/ui/input"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import { queryApi } from "@/lib/orpc/query"
 
 interface SearchAutocompleteProps {
@@ -21,12 +22,15 @@ export function SearchAutocomplete({
   placeholder = "Search the web...",
 }: SearchAutocompleteProps) {
   const [isOpen, setIsOpen] = useState(false)
+  const queryClient = useQueryClient()
 
   const { data: suggestions = [], isFetching } = useQuery({
     ...queryApi.search.autocomplete.queryOptions({
       input: { query: value },
     }),
     enabled: value.length > 1,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   })
 
   useEffect(() => {
@@ -37,11 +41,29 @@ export function SearchAutocomplete({
     }
   }, [value, suggestions, isFetching])
 
+  useEffect(() => {
+    return () => {
+      void queryClient.cancelQueries({
+        predicate: (query) =>
+          query.queryKey[0] === "search" &&
+          query.queryKey[1] === "autocomplete",
+      })
+    }
+  }, [queryClient])
+
+  const handleSubmit = () => {
+    void queryClient.cancelQueries({
+      predicate: (query) =>
+        query.queryKey[0] === "search" && query.queryKey[1] === "autocomplete",
+    })
+    setIsOpen(false)
+    onSubmit()
+  }
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
       e.preventDefault()
-      setIsOpen(false)
-      onSubmit()
+      handleSubmit()
     } else if (e.key === "Escape") {
       setIsOpen(false)
     } else if (e.key === "ArrowDown" && suggestions.length > 0) {
@@ -53,7 +75,7 @@ export function SearchAutocomplete({
   const handleSelect = (suggestion: string) => {
     onChange(suggestion)
     setIsOpen(false)
-    setTimeout(() => onSubmit(), 100)
+    setTimeout(() => handleSubmit(), 100)
   }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -64,42 +86,56 @@ export function SearchAutocomplete({
     setTimeout(() => setIsOpen(false), 200)
   }
 
+  const handleFocus = () => {
+    if (value.length > 1 && suggestions.length > 0) {
+      setIsOpen(true)
+    }
+  }
+
   const showSuggestions = isOpen && suggestions.length > 0
 
   return (
     <div className="relative w-full">
       <div className="relative">
-        <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
         <Input
           type="search"
           placeholder={placeholder}
           value={value}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
-          onFocus={() =>
-            value.length > 1 && suggestions.length > 0 && setIsOpen(true)
-          }
+          onFocus={handleFocus}
           onBlur={handleBlur}
-          className="pl-10"
+          className="pr-10"
+          size="lg"
           autoComplete="off"
         />
+        <button
+          type="button"
+          onClick={handleSubmit}
+          className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2 transition-colors"
+          aria-label="Search"
+        >
+          <Search className="h-4 w-4" />
+        </button>
       </div>
 
       {showSuggestions && (
         <div className="bg-popover absolute top-full right-0 left-0 z-50 mt-1 rounded-md border shadow-md">
-          <div className="max-h-[300px] overflow-y-auto p-1">
-            {suggestions.map((suggestion, index) => (
-              <button
-                key={index}
-                type="button"
-                onClick={() => handleSelect(suggestion)}
-                className="hover:bg-accent hover:text-accent-foreground flex w-full items-center gap-2 rounded-sm px-3 py-2 text-left text-sm"
-              >
-                <Search className="text-muted-foreground h-4 w-4" />
-                <span>{suggestion}</span>
-              </button>
-            ))}
-          </div>
+          <ScrollArea className="h-[20vh]">
+            <div className="p-1">
+              {suggestions.map((suggestion, index) => (
+                <button
+                  key={index}
+                  type="button"
+                  onClick={() => handleSelect(suggestion)}
+                  className="hover:bg-accent hover:text-accent-foreground flex w-full items-center gap-2 rounded-sm px-3 py-2 text-left text-sm"
+                >
+                  <Search className="text-muted-foreground h-4 w-4" />
+                  <span>{suggestion}</span>
+                </button>
+              ))}
+            </div>
+          </ScrollArea>
         </div>
       )}
     </div>

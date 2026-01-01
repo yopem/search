@@ -55,13 +55,13 @@
   --border: var(--border);
   --accent: var(--accent);
   @keyframes skeleton {
-  to {
-    background-position: -200% 0;
+    to {
+      background-position: -200% 0;
     }
   }
   @keyframes skeleton {
-  to {
-    background-position: -200% 0;
+    to {
+      background-position: -200% 0;
     }
   }
 }

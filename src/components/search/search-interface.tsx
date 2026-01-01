@@ -13,9 +13,7 @@ import { SearchError } from "@/components/search/search-error"
 import { SearchSkeleton } from "@/components/search/search-skeleton"
 import { VideoResultCard } from "@/components/search/video-result-card"
 import { WebResultCard } from "@/components/search/web-result-card"
-import ThemeSwitcher from "@/components/theme/theme-switcher"
 import { Button } from "@/components/ui/button"
-import { Field } from "@/components/ui/field"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { queryApi } from "@/lib/orpc/query"
 
@@ -49,7 +47,7 @@ export function SearchInterface({ mode }: SearchInterfaceProps) {
     | "news"
   const initialPage = Number(searchParams.get("page")) || 1
 
-  const [query, setQuery] = useState(mode === "results" ? initialQuery : "")
+  const [query, setQuery] = useState("")
   const [category, setCategory] = useState(initialCategory)
   const [page, setPage] = useState(initialPage)
 
@@ -98,11 +96,7 @@ export function SearchInterface({ mode }: SearchInterfaceProps) {
 
   if (mode === "home") {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-8 p-4">
-        <div className="absolute top-4 right-4">
-          <ThemeSwitcher />
-        </div>
-
+      <div className="flex min-h-screen flex-col items-center justify-center gap-8 p-4 pt-20">
         <div className="flex flex-col items-center gap-4">
           <Logo className="h-24 w-auto" />
           <h1 className="text-4xl font-semibold">Yopem</h1>
@@ -111,26 +105,20 @@ export function SearchInterface({ mode }: SearchInterfaceProps) {
           </p>
         </div>
 
-        <div className="flex w-full max-w-2xl gap-2">
-          <Field className="flex-1">
-            <SearchAutocomplete
-              value={query}
-              onChange={setQuery}
-              onSubmit={handleSearch}
-            />
-          </Field>
-          <Button onClick={handleSearch}>Search</Button>
+        <div className="w-full max-w-2xl">
+          <SearchAutocomplete
+            value={query}
+            onChange={setQuery}
+            onSubmit={handleSearch}
+            placeholder="Search without being tracked"
+          />
         </div>
       </div>
     )
   }
 
   return (
-    <div className="container mx-auto max-w-7xl px-4 py-8">
-      <div className="absolute top-4 right-4">
-        <ThemeSwitcher />
-      </div>
-
+    <div className="container mx-auto max-w-7xl px-4 py-8 pt-20">
       <form
         onSubmit={(e) => {
           e.preventDefault()
@@ -138,16 +126,11 @@ export function SearchInterface({ mode }: SearchInterfaceProps) {
         }}
         className="mb-8"
       >
-        <div className="flex gap-2">
-          <Field className="flex-1">
-            <SearchAutocomplete
-              value={query}
-              onChange={setQuery}
-              onSubmit={handleSearch}
-            />
-          </Field>
-          <Button type="submit">Search</Button>
-        </div>
+        <SearchAutocomplete
+          value={query}
+          onChange={setQuery}
+          onSubmit={handleSearch}
+        />
       </form>
 
       <Tabs value={category} onValueChange={handleCategoryChange}>

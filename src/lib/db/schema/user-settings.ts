@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp } from "drizzle-orm/pg-core"
+import { boolean, pgTable, text, timestamp } from "drizzle-orm/pg-core"
 import { createInsertSchema, createUpdateSchema } from "drizzle-zod"
 
 import { createCustomId } from "@/lib/utils/custom-id"
@@ -8,6 +8,7 @@ export const userSettingsTable = pgTable("user_settings", {
     .primaryKey()
     .$defaultFn(() => createCustomId()),
   userId: text("user_id").notNull().unique(),
+  showSearchHistory: boolean("show_search_history").notNull().default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at")
     .defaultNow()
