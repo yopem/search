@@ -17,3 +17,4 @@ export const r2Region = env.R2_REGION
 
 export const searxngUrl = env.SEARXNG_URL
 export const weatherApiKey = env.WEATHER_API_KEY
+export const tmdbApiKey = env.TMDB_API_KEY

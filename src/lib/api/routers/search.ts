@@ -8,9 +8,31 @@ import {
   searchHistoryTable,
   userSettingsTable,
 } from "@/lib/db/schema"
-import { searxngUrl, weatherApiKey } from "@/lib/env/server"
+import { searxngUrl, tmdbApiKey, weatherApiKey } from "@/lib/env/server"
 
 const searchCategorySchema = z.enum(["general", "images", "videos", "news"])
+
+const infoboxTypeSchema = z.enum([
+  "person",
+  "place",
+  "organization",
+  "movie",
+  "product",
+  "wiki",
+  "tech",
+])
+
+const infoboxDataSchema = z.object({
+  type: infoboxTypeSchema,
+  title: z.string(),
+  image: z.string().optional(),
+  summary: z.string().optional(),
+  attributes: z.record(z.string(), z.unknown()).optional(),
+  source: z.string(),
+  sourceUrl: z.string(),
+})
+
+type InfoboxData = z.infer<typeof infoboxDataSchema>
 
 const searchInputSchema = z.object({
   query: z.string().min(1).max(500),
@@ -47,8 +69,186 @@ interface SearxngResponse {
   number_of_results: number
   results: SearxngResult[]
   suggestions?: string[]
-  infoboxes?: unknown[]
+  infoboxes?: SearxngInfobox[]
   unresponsive_engines?: string[][]
+}
+
+interface SearxngInfobox {
+  infobox: string
+  content?: string
+  engine?: string
+  urls?: { title: string; url: string }[]
+  img_src?: string
+  attributes?: { label: string; value: string | number }[]
+}
+
+const detectEntityType = (
+  query: string,
+  infobox: SearxngInfobox,
+): z.infer<typeof infoboxDataSchema>["type"] => {
+  const lowerQuery = query.toLowerCase()
+  const attributes = infobox.attributes ?? []
+  const attributeLabels = attributes.map((attr) => attr.label.toLowerCase())
+
+  if (
+    attributeLabels.some(
+      (label) =>
+        label.includes("born") ||
+        label.includes("birth") ||
+        label.includes("died") ||
+        label.includes("death") ||
+        label.includes("occupation"),
+    )
+  ) {
+    return "person"
+  }
+
+  if (
+    attributeLabels.some(
+      (label) =>
+        label.includes("population") ||
+        label.includes("area") ||
+        label.includes("coordinates") ||
+        label.includes("country"),
+    )
+  ) {
+    return "place"
+  }
+
+  if (
+    attributeLabels.some(
+      (label) =>
+        label.includes("founded") ||
+        label.includes("headquarters") ||
+        label.includes("industry") ||
+        label.includes("ceo"),
+    ) ||
+    lowerQuery.includes("company") ||
+    lowerQuery.includes("corporation")
+  ) {
+    return "organization"
+  }
+
+  if (
+    attributeLabels.some(
+      (label) =>
+        label.includes("director") ||
+        label.includes("release") ||
+        label.includes("cast") ||
+        label.includes("runtime"),
+    ) ||
+    lowerQuery.includes("movie") ||
+    lowerQuery.includes("film")
+  ) {
+    return "movie"
+  }
+
+  if (
+    attributeLabels.some(
+      (label) =>
+        label.includes("price") ||
+        label.includes("manufacturer") ||
+        label.includes("model"),
+    )
+  ) {
+    return "product"
+  }
+
+  if (
+    infobox.engine?.toLowerCase().includes("stackoverflow") ||
+    infobox.engine?.toLowerCase().includes("mdn") ||
+    lowerQuery.includes("api") ||
+    lowerQuery.includes("function")
+  ) {
+    return "tech"
+  }
+
+  return "wiki"
+}
+
+const parseInfobox = (
+  query: string,
+  infobox: SearxngInfobox,
+): InfoboxData | null => {
+  try {
+    const entityType = detectEntityType(query, infobox)
+    const urls = infobox.urls ?? []
+    const sourceUrl = urls[0]?.url ?? ""
+
+    const attributes: Record<string, unknown> = {}
+    if (infobox.attributes) {
+      for (const attr of infobox.attributes) {
+        attributes[attr.label] = attr.value
+      }
+    }
+
+    const parsedInfobox: InfoboxData = {
+      type: entityType,
+      title: infobox.infobox,
+      image: infobox.img_src,
+      summary: infobox.content,
+      attributes,
+      source: infobox.engine ?? "Wikipedia",
+      sourceUrl,
+    }
+
+    return infoboxDataSchema.parse(parsedInfobox)
+  } catch {
+    return null
+  }
+}
+
+const fetchTmdbMovie = async (query: string): Promise<InfoboxData | null> => {
+  if (!tmdbApiKey) {
+    return null
+  }
+
+  try {
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 3000)
+
+    const searchResponse = await fetch(
+      `https://api.themoviedb.org/3/search/movie?api_key=${tmdbApiKey}&query=${encodeURIComponent(query)}`,
+      { signal: controller.signal },
+    )
+
+    clearTimeout(timeoutId)
+
+    if (!searchResponse.ok) {
+      return null
+    }
+
+    const searchData = await searchResponse.json()
+    if (!searchData.results || searchData.results.length === 0) {
+      return null
+    }
+
+    const movie = searchData.results[0]
+    const attributes: Record<string, unknown> = {}
+
+    if (movie.release_date) {
+      attributes["Release date"] = movie.release_date
+    }
+    if (movie.vote_average) {
+      attributes["Rating"] = `${movie.vote_average}/10`
+    }
+
+    const infobox: InfoboxData = {
+      type: "movie",
+      title: movie.title,
+      image: movie.poster_path
+        ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+        : undefined,
+      summary: movie.overview,
+      attributes,
+      source: "TMDB",
+      sourceUrl: `https://www.themoviedb.org/movie/${movie.id}`,
+    }
+
+    return infoboxDataSchema.parse(infobox)
+  } catch {
+    return null
+  }
 }
 
 export const searchRouter = {
@@ -88,6 +288,24 @@ export const searchRouter = {
 
         const data = (await response.json()) as SearxngResponse
 
+        let infobox: InfoboxData | null = null
+        if (
+          category === "general" &&
+          data.infoboxes &&
+          data.infoboxes.length > 0
+        ) {
+          infobox = parseInfobox(query, data.infoboxes[0])
+        }
+
+        if (
+          category === "general" &&
+          !infobox &&
+          (query.toLowerCase().includes("movie") ||
+            query.toLowerCase().includes("film"))
+        ) {
+          infobox = await fetchTmdbMovie(query)
+        }
+
         if (
           context.session &&
           typeof context.session === "object" &&
@@ -119,6 +337,7 @@ export const searchRouter = {
           results: data.results,
           totalResults: data.number_of_results,
           suggestions: data.suggestions ?? [],
+          infobox,
           page,
           _meta: {
             responseTime,

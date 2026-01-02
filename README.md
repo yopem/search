@@ -72,6 +72,9 @@ Beautiful, distraction-free interface with:
 - **OpenAuth Issuer** - Required for authentication
   ([setup guide](https://openauth.js.org/docs/issuer/))
 - **Weather API Key** - Optional, for weather instant answers
+  ([WeatherAPI.com](https://www.weatherapi.com/))
+- **TMDB API Key** - Optional, for enhanced movie information panels
+  ([TMDB](https://www.themoviedb.org/settings/api))
 
 ## Installation
 
@@ -189,24 +192,25 @@ instructions.
 
 ### Optional Variables
 
-| Variable                        | Description                                 |
-| ------------------------------- | ------------------------------------------- |
-| `REDIS_URL`                     | Redis connection string (for caching)       |
-| `WEATHER_API_KEY`               | Weather API key for weather instant answers |
-| `NEXT_PUBLIC_GA_MEASUREMENT_ID` | Google Analytics measurement ID             |
-| `NEXT_PUBLIC_UMAMI_TRACKING_ID` | Umami Analytics tracking ID                 |
-| `NEXT_PUBLIC_LOGO_URL`          | Custom logo URL                             |
-| `NEXT_PUBLIC_LOGO_OG_URL`       | Custom Open Graph logo URL                  |
-| `NEXT_PUBLIC_SITE_TITLE`        | Custom site title                           |
-| `NEXT_PUBLIC_SITE_DESCRIPTION`  | Custom site description                     |
-| `NEXT_PUBLIC_SITE_DOMAIN`       | Site domain                                 |
-| `NEXT_PUBLIC_SITE_TAGLINE`      | Site tagline                                |
-| `NEXT_PUBLIC_SUPPORT_EMAIL`     | Support email address                       |
-| `CF_ACCOUNT_ID`                 | Cloudflare R2 account ID                    |
-| `R2_ACCESS_KEY`                 | Cloudflare R2 access key                    |
-| `R2_SECRET_KEY`                 | Cloudflare R2 secret key                    |
-| `R2_BUCKET`                     | Cloudflare R2 bucket name                   |
-| `R2_DOMAIN`                     | Cloudflare R2 domain                        |
+| Variable                        | Description                                        |
+| ------------------------------- | -------------------------------------------------- |
+| `REDIS_URL`                     | Redis connection string (for caching)              |
+| `WEATHER_API_KEY`               | Weather API key for weather instant answers        |
+| `TMDB_API_KEY`                  | TMDB API key for enhanced movie information panels |
+| `NEXT_PUBLIC_GA_MEASUREMENT_ID` | Google Analytics measurement ID                    |
+| `NEXT_PUBLIC_UMAMI_TRACKING_ID` | Umami Analytics tracking ID                        |
+| `NEXT_PUBLIC_LOGO_URL`          | Custom logo URL                                    |
+| `NEXT_PUBLIC_LOGO_OG_URL`       | Custom Open Graph logo URL                         |
+| `NEXT_PUBLIC_SITE_TITLE`        | Custom site title                                  |
+| `NEXT_PUBLIC_SITE_DESCRIPTION`  | Custom site description                            |
+| `NEXT_PUBLIC_SITE_DOMAIN`       | Site domain                                        |
+| `NEXT_PUBLIC_SITE_TAGLINE`      | Site tagline                                       |
+| `NEXT_PUBLIC_SUPPORT_EMAIL`     | Support email address                              |
+| `CF_ACCOUNT_ID`                 | Cloudflare R2 account ID                           |
+| `R2_ACCESS_KEY`                 | Cloudflare R2 access key                           |
+| `R2_SECRET_KEY`                 | Cloudflare R2 secret key                           |
+| `R2_BUCKET`                     | Cloudflare R2 bucket name                          |
+| `R2_DOMAIN`                     | Cloudflare R2 domain                               |
 
 For a complete list of environment variables, see [.env.example](.env.example).
 

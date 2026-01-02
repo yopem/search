@@ -23,6 +23,7 @@ export const userSettingsRouter = {
           userId: context.session.id,
           showSearchHistory: true,
           openInNewTab: true,
+          showInfoboxPanels: true,
         })
         .returning()
 
@@ -42,6 +43,7 @@ export const userSettingsRouter = {
       updateUserSettingsSchema.pick({
         showSearchHistory: true,
         openInNewTab: true,
+        showInfoboxPanels: true,
       }),
     )
     .handler(async ({ input, context }) => {
@@ -51,6 +53,7 @@ export const userSettingsRouter = {
           .set({
             showSearchHistory: input.showSearchHistory,
             openInNewTab: input.openInNewTab,
+            showInfoboxPanels: input.showInfoboxPanels,
             updatedAt: new Date(),
           })
           .where(eq(userSettingsTable.userId, context.session.id))

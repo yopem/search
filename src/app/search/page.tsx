@@ -4,6 +4,7 @@ import { redirect } from "next/navigation"
 import SearchInterface from "@/components/search/search-interface"
 import SearchSkeleton from "@/components/search/search-skeleton"
 import { auth } from "@/lib/auth/session"
+import { weatherApiKey } from "@/lib/env/server"
 import { serverApi } from "@/lib/orpc/server"
 
 interface SearchPageProps {
@@ -25,10 +26,11 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
       const settings = await serverApi.userSettings.get({})
       openInNewTab = settings.openInNewTab
     } catch {
-      // If fetching settings fails, use default value
       openInNewTab = true
     }
   }
+
+  const hasWeatherApi = !!weatherApiKey
 
   return (
     <Suspense fallback={<SearchSkeleton />}>
@@ -36,6 +38,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         mode="results"
         session={session || null}
         openInNewTab={openInNewTab}
+        hasWeatherApi={hasWeatherApi}
       />
     </Suspense>
   )

@@ -2,12 +2,19 @@
 
 import { useCallback, useEffect, useRef, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query"
+import {
+  useInfiniteQuery,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query"
 import { parseAsString, parseAsStringLiteral, useQueryState } from "nuqs"
 
 import Logo from "@/components/logo"
 import ImageResultCard from "@/components/search/image-result-card"
 import ImageViewer from "@/components/search/image-viewer"
+import InfoboxPanel, {
+  InfoboxPanelSkeleton,
+} from "@/components/search/infobox-panel"
 import CalculatorWidget from "@/components/search/instant-answer-calculator"
 import UnitConverterWidget from "@/components/search/instant-answer-unit-converter"
 import WeatherWidget from "@/components/search/instant-answer-weather"
@@ -50,6 +57,7 @@ interface SearchInterfaceProps {
     name: string | null
   } | null
   openInNewTab?: boolean
+  hasWeatherApi?: boolean
 }
 
 const BANG_MAPPINGS: Record<string, string> = {
@@ -73,6 +81,7 @@ const SearchInterface = ({
   mode,
   session,
   openInNewTab = true,
+  hasWeatherApi = false,
 }: SearchInterfaceProps) => {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -107,9 +116,11 @@ const SearchInterface = ({
       return { type: "unitConverter", data: query }
     }
 
-    const weatherRegex = /weather\s+(?:in\s+)?(.+)|(.+)\s+weather/i
-    if (weatherRegex.test(query)) {
-      return { type: "weather", data: query }
+    if (hasWeatherApi) {
+      const weatherRegex = /weather\s+(?:in\s+)?(.+)|(.+)\s+weather/i
+      if (weatherRegex.test(query)) {
+        return { type: "weather", data: query }
+      }
     }
 
     return null
@@ -167,6 +178,13 @@ const SearchInterface = ({
       enabled: mode === "results" && !!initialQuery,
     }),
   )
+
+  const { data: userSettings } = useQuery({
+    ...queryApi.userSettings.get.queryOptions({
+      input: {},
+    }),
+    enabled: !!session,
+  })
 
   const allResults = data?.pages.flatMap((page) => page.results) ?? []
 
@@ -510,12 +528,12 @@ const SearchInterface = ({
         session={session ?? null}
       />
 
-      <div className="pt-[120px]">
+      <div className="pt-30">
         <div className="container mx-auto px-4">
           <div className="flex gap-8">
             <div
               className={
-                category === "images" ? "w-full" : "w-full max-w-[650px]"
+                category === "images" ? "w-full" : "w-full max-w-162.5"
               }
             >
               <SearchFilters
@@ -741,12 +759,32 @@ const SearchInterface = ({
             </div>
 
             {category !== "images" && (
-              <div className="hidden w-[300px] shrink-0 lg:block">
-                {!isLoading && !error && allResults.length > 0 && (
-                  <div className="sticky top-[140px]">
+              <div className="hidden w-100 shrink-0 lg:block">
+                <div className="sticky top-35 space-y-6">
+                  {isLoading &&
+                    category === "general" &&
+                    (userSettings?.showInfoboxPanels ?? true) && (
+                      <InfoboxPanelSkeleton />
+                    )}
+                  {!isLoading &&
+                    !error &&
+                    category === "general" &&
+                    (userSettings?.showInfoboxPanels ?? true) &&
+                    data?.pages[0]?.infobox && (
+                      <InfoboxPanel
+                        type={data.pages[0].infobox.type}
+                        title={data.pages[0].infobox.title}
+                        image={data.pages[0].infobox.image}
+                        summary={data.pages[0].infobox.summary}
+                        attributes={data.pages[0].infobox.attributes}
+                        source={data.pages[0].infobox.source}
+                        sourceUrl={data.pages[0].infobox.sourceUrl}
+                      />
+                    )}
+                  {!isLoading && !error && allResults.length > 0 && (
                     <RelatedSearches query={initialQuery} category={category} />
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             )}
 

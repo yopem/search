@@ -48,6 +48,16 @@ const SettingsContent = () => {
     })
   }
 
+  const handleToggleInfoboxPanels = (checked: boolean) => {
+    updateMutation.mutate({ showInfoboxPanels: checked })
+    toastManager.add({
+      title: "Settings updated",
+      description: checked
+        ? "Infobox panels will be shown"
+        : "Infobox panels will be hidden",
+    })
+  }
+
   if (isLoading) {
     return (
       <div className="space-y-6">
@@ -88,6 +98,28 @@ const SettingsContent = () => {
             <Switch
               checked={settings?.openInNewTab ?? true}
               onCheckedChange={handleToggleOpenInNewTab}
+              disabled={updateMutation.isPending}
+            />
+          </Field>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Search Results</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Field className="flex flex-row items-center justify-between gap-4">
+            <div className="flex-1">
+              <FieldLabel>Show infobox panels</FieldLabel>
+              <FieldDescription>
+                Display information panels with details about entities, people,
+                places, and organizations
+              </FieldDescription>
+            </div>
+            <Switch
+              checked={settings?.showInfoboxPanels ?? true}
+              onCheckedChange={handleToggleInfoboxPanels}
               disabled={updateMutation.isPending}
             />
           </Field>
