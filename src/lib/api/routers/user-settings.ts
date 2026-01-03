@@ -24,6 +24,9 @@ export const userSettingsRouter = {
           showSearchHistory: true,
           openInNewTab: true,
           showInfoboxPanels: true,
+          showCalculator: true,
+          showUnitConverter: true,
+          showWeather: true,
         })
         .returning()
 
@@ -44,6 +47,9 @@ export const userSettingsRouter = {
         showSearchHistory: true,
         openInNewTab: true,
         showInfoboxPanels: true,
+        showCalculator: true,
+        showUnitConverter: true,
+        showWeather: true,
         defaultLanguage: true,
         defaultTimeRange: true,
         defaultSafeSearch: true,
@@ -57,6 +63,9 @@ export const userSettingsRouter = {
             showSearchHistory: input.showSearchHistory,
             openInNewTab: input.openInNewTab,
             showInfoboxPanels: input.showInfoboxPanels,
+            showCalculator: input.showCalculator,
+            showUnitConverter: input.showUnitConverter,
+            showWeather: input.showWeather,
             defaultLanguage: input.defaultLanguage,
             defaultTimeRange: input.defaultTimeRange,
             defaultSafeSearch: input.defaultSafeSearch,

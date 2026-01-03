@@ -133,6 +133,36 @@ const SettingsContent = () => {
     })
   }
 
+  const handleToggleCalculator = (checked: boolean) => {
+    updateMutation.mutate({ showCalculator: checked })
+    toastManager.add({
+      title: "Settings updated",
+      description: checked
+        ? "Calculator instant answer enabled"
+        : "Calculator instant answer disabled",
+    })
+  }
+
+  const handleToggleUnitConverter = (checked: boolean) => {
+    updateMutation.mutate({ showUnitConverter: checked })
+    toastManager.add({
+      title: "Settings updated",
+      description: checked
+        ? "Unit converter instant answer enabled"
+        : "Unit converter instant answer disabled",
+    })
+  }
+
+  const handleToggleWeather = (checked: boolean) => {
+    updateMutation.mutate({ showWeather: checked })
+    toastManager.add({
+      title: "Settings updated",
+      description: checked
+        ? "Weather instant answer enabled"
+        : "Weather instant answer disabled",
+    })
+  }
+
   const handleLanguageChange = (language: string) => {
     updateMutation.mutate({ defaultLanguage: language || null })
     setLanguageSearchQuery("")
@@ -217,7 +247,7 @@ const SettingsContent = () => {
         <CardHeader>
           <CardTitle>Search Results</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
           <Field className="flex flex-row items-center justify-between gap-4">
             <div className="flex-1">
               <FieldLabel>Show infobox panels</FieldLabel>
@@ -229,6 +259,55 @@ const SettingsContent = () => {
             <Switch
               checked={settings?.showInfoboxPanels ?? true}
               onCheckedChange={handleToggleInfoboxPanels}
+              disabled={updateMutation.isPending}
+            />
+          </Field>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Instant Answers</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Field className="flex flex-row items-center justify-between gap-4">
+            <div className="flex-1">
+              <FieldLabel>Show calculator</FieldLabel>
+              <FieldDescription>
+                Display calculator for mathematical expressions
+              </FieldDescription>
+            </div>
+            <Switch
+              checked={settings?.showCalculator ?? true}
+              onCheckedChange={handleToggleCalculator}
+              disabled={updateMutation.isPending}
+            />
+          </Field>
+
+          <Field className="flex flex-row items-center justify-between gap-4">
+            <div className="flex-1">
+              <FieldLabel>Show unit converter</FieldLabel>
+              <FieldDescription>
+                Display unit converter for measurements and conversions
+              </FieldDescription>
+            </div>
+            <Switch
+              checked={settings?.showUnitConverter ?? true}
+              onCheckedChange={handleToggleUnitConverter}
+              disabled={updateMutation.isPending}
+            />
+          </Field>
+
+          <Field className="flex flex-row items-center justify-between gap-4">
+            <div className="flex-1">
+              <FieldLabel>Show weather</FieldLabel>
+              <FieldDescription>
+                Display weather information for location queries
+              </FieldDescription>
+            </div>
+            <Switch
+              checked={settings?.showWeather ?? true}
+              onCheckedChange={handleToggleWeather}
               disabled={updateMutation.isPending}
             />
           </Field>

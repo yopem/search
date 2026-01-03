@@ -368,6 +368,10 @@ const SearchInterface = ({
       return
     }
 
+    if (pageNumber === 1) {
+      return
+    }
+
     const currentPagesLoaded = data.pages.length
 
     if (pageNumber > currentPagesLoaded && hasNextPage && !isFetchingNextPage) {
@@ -664,17 +668,20 @@ const SearchInterface = ({
                   </div>
                 )}
 
-              {instantAnswer?.type === "calculator" && (
-                <CalculatorWidget initialExpression={instantAnswer.data} />
-              )}
+              {instantAnswer?.type === "calculator" &&
+                (userSettings?.showCalculator ?? true) && (
+                  <CalculatorWidget initialExpression={instantAnswer.data} />
+                )}
 
-              {instantAnswer?.type === "unitConverter" && (
-                <UnitConverterWidget initialQuery={instantAnswer.data} />
-              )}
+              {instantAnswer?.type === "unitConverter" &&
+                (userSettings?.showUnitConverter ?? true) && (
+                  <UnitConverterWidget initialQuery={instantAnswer.data} />
+                )}
 
-              {instantAnswer?.type === "weather" && (
-                <WeatherWidget initialQuery={instantAnswer.data} />
-              )}
+              {instantAnswer?.type === "weather" &&
+                (userSettings?.showWeather ?? true) && (
+                  <WeatherWidget initialQuery={instantAnswer.data} />
+                )}
 
               {error && <SearchError error={error} onRetry={() => refetch()} />}
 
