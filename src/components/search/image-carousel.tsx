@@ -42,7 +42,7 @@ const ImageCarousel = ({
 
   return (
     <section
-      className="mt-6 mb-6"
+      className="my-6"
       role="region"
       aria-label={`Image carousel for ${query}`}
     >
@@ -73,12 +73,6 @@ const ImageCarousel = ({
           </CarouselItem>
         ))}
       </Carousel>
-
-      <div className="mt-4 flex justify-center">
-        <Button variant="ghost" size="sm" onClick={handleViewAll}>
-          View all images
-        </Button>
-      </div>
     </section>
   )
 }
