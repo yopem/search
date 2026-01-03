@@ -10,6 +10,7 @@ import {
 import { parseAsString, parseAsStringLiteral, useQueryState } from "nuqs"
 
 import Logo from "@/components/logo"
+import ImageCarousel from "@/components/search/image-carousel"
 import ImageResultCard from "@/components/search/image-result-card"
 import ImageViewer from "@/components/search/image-viewer"
 import InfoboxPanel, {
@@ -184,6 +185,17 @@ const SearchInterface = ({
       input: {},
     }),
     enabled: !!session,
+  })
+
+  const { data: carouselImages, isLoading: isLoadingImages } = useQuery({
+    ...queryApi.search.getImages.queryOptions({
+      input: {
+        query: initialQuery || "",
+        region: region || undefined,
+        safeSearch: safeSearch || undefined,
+      },
+    }),
+    enabled: mode === "results" && !!initialQuery && category === "general",
   })
 
   const allResults = data?.pages.flatMap((page) => page.results) ?? []
@@ -404,14 +416,22 @@ const SearchInterface = ({
     setIsViewerOpen(true)
   }
 
+  const handleCarouselImageClick = (index: number) => {
+    setSelectedImageIndex(index)
+    setIsViewerOpen(true)
+  }
+
   const handleNext = useCallback(() => {
-    if (
-      selectedImageIndex !== null &&
-      selectedImageIndex < allResults.length - 1
-    ) {
-      setSelectedImageIndex(selectedImageIndex + 1)
+    if (selectedImageIndex !== null) {
+      const totalImages =
+        category === "general" && carouselImages
+          ? carouselImages.length
+          : allResults.length
+      if (selectedImageIndex < totalImages - 1) {
+        setSelectedImageIndex(selectedImageIndex + 1)
+      }
     }
-  }, [selectedImageIndex, allResults.length])
+  }, [selectedImageIndex, allResults.length, category, carouselImages])
 
   const handlePrevious = useCallback(() => {
     if (selectedImageIndex !== null && selectedImageIndex > 0) {
@@ -601,17 +621,48 @@ const SearchInterface = ({
                                 pageIndex *
                                   (data.pages[0]?.results.length || 10) +
                                 resultIndex
+                              const shouldShowCarousel =
+                                pageIndex === 0 &&
+                                resultIndex === 2 &&
+                                carouselImages &&
+                                carouselImages.length >= 6
+
                               return (
-                                <article
-                                  key={globalIndex}
-                                  aria-posinset={globalIndex + 1}
-                                  aria-setsize={allResults.length}
-                                >
-                                  <WebResultCard
-                                    result={result}
-                                    openInNewTab={openInNewTab}
-                                  />
-                                </article>
+                                <div key={globalIndex}>
+                                  <article
+                                    aria-posinset={globalIndex + 1}
+                                    aria-setsize={allResults.length}
+                                  >
+                                    <WebResultCard
+                                      result={result}
+                                      openInNewTab={openInNewTab}
+                                    />
+                                  </article>
+                                  {pageIndex === 0 &&
+                                    resultIndex === 2 &&
+                                    (isLoadingImages ? (
+                                      <div className="my-4 flex gap-2 overflow-hidden">
+                                        {Array.from({ length: 6 }).map(
+                                          (_, i) => (
+                                            <div
+                                              key={i}
+                                              className="bg-muted h-32 w-48 flex-shrink-0 animate-pulse rounded-lg"
+                                            />
+                                          ),
+                                        )}
+                                      </div>
+                                    ) : (
+                                      shouldShowCarousel && (
+                                        <ImageCarousel
+                                          images={carouselImages}
+                                          query={initialQuery}
+                                          onImageClick={
+                                            handleCarouselImageClick
+                                          }
+                                        />
+                                      )
+                                    ))}
+                                </div>
                               )
                             },
                           )}
@@ -795,7 +846,32 @@ const SearchInterface = ({
         </div>
       </div>
 
-      {selectedImageIndex !== null && (
+      {selectedImageIndex !== null &&
+        category === "general" &&
+        carouselImages && (
+          <ImageViewer
+            isOpen={isViewerOpen}
+            onClose={handleClose}
+            currentIndex={selectedImageIndex}
+            totalImages={carouselImages.length}
+            image={carouselImages[selectedImageIndex]}
+            nextImage={
+              selectedImageIndex < carouselImages.length - 1
+                ? carouselImages[selectedImageIndex + 1]
+                : undefined
+            }
+            previousImage={
+              selectedImageIndex > 0
+                ? carouselImages[selectedImageIndex - 1]
+                : undefined
+            }
+            onNext={handleNext}
+            onPrevious={handlePrevious}
+            openInNewTab={openInNewTab}
+          />
+        )}
+
+      {selectedImageIndex !== null && category !== "general" && (
         <ImageViewer
           isOpen={isViewerOpen}
           onClose={handleClose}

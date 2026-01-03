@@ -198,7 +198,7 @@ const ImageViewer = ({
                 </div>
               )}
 
-              {imageError && (
+              {(imageError || !imageUrl) && (
                 <div className="flex flex-col items-center gap-4 text-white">
                   <p className="text-lg">Failed to load image</p>
                   <Button
@@ -214,7 +214,7 @@ const ImageViewer = ({
                 </div>
               )}
 
-              {!imageError && (
+              {!imageError && imageUrl && (
                 <div className="flex flex-col items-center gap-4">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img

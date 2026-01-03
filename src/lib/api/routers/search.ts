@@ -353,6 +353,51 @@ export const searchRouter = {
       }
     }),
 
+  getImages: publicProcedure
+    .input(
+      z.object({
+        query: z.string(),
+        region: z.string().optional(),
+        safeSearch: z.string().optional(),
+      }),
+    )
+    .handler(async ({ input }) => {
+      const { query, region, safeSearch } = input
+
+      try {
+        const imageParams = new URLSearchParams({
+          q: query,
+          format: "json",
+          categories: "images",
+          pageno: "1",
+        })
+
+        if (region) {
+          imageParams.set("language", region)
+        }
+
+        if (safeSearch) {
+          imageParams.set("safesearch", safeSearch)
+        }
+
+        const response = await fetch(`${searxngUrl}/search?${imageParams}`)
+
+        if (!response.ok) {
+          return []
+        }
+
+        const data = (await response.json()) as SearxngResponse
+
+        if (data.results.length >= 6) {
+          return data.results.slice(0, 12)
+        }
+
+        return []
+      } catch {
+        return []
+      }
+    }),
+
   autocomplete: publicProcedure
     .input(autocompleteInputSchema)
     .handler(async ({ input }) => {
