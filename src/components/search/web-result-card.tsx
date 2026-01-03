@@ -41,7 +41,7 @@ const WebResultCard = ({
               rel="noopener noreferrer"
               className="group"
             >
-              <CardTitle className="text-base leading-snug font-normal group-hover:underline">
+              <CardTitle className="line-clamp-2 text-base leading-snug font-normal group-hover:underline">
                 {result.title}
               </CardTitle>
             </a>
