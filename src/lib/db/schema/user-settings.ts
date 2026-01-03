@@ -11,6 +11,9 @@ export const userSettingsTable = pgTable("user_settings", {
   showSearchHistory: boolean("show_search_history").notNull().default(true),
   openInNewTab: boolean("open_in_new_tab").notNull().default(true),
   showInfoboxPanels: boolean("show_infobox_panels").notNull().default(true),
+  defaultLanguage: text("default_language"),
+  defaultTimeRange: text("default_time_range"),
+  defaultSafeSearch: text("default_safe_search"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at")
     .defaultNow()

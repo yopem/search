@@ -44,6 +44,9 @@ export const userSettingsRouter = {
         showSearchHistory: true,
         openInNewTab: true,
         showInfoboxPanels: true,
+        defaultLanguage: true,
+        defaultTimeRange: true,
+        defaultSafeSearch: true,
       }),
     )
     .handler(async ({ input, context }) => {
@@ -54,6 +57,9 @@ export const userSettingsRouter = {
             showSearchHistory: input.showSearchHistory,
             openInNewTab: input.openInNewTab,
             showInfoboxPanels: input.showInfoboxPanels,
+            defaultLanguage: input.defaultLanguage,
+            defaultTimeRange: input.defaultTimeRange,
+            defaultSafeSearch: input.defaultSafeSearch,
             updatedAt: new Date(),
           })
           .where(eq(userSettingsTable.userId, context.session.id))

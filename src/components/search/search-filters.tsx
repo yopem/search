@@ -6,7 +6,13 @@ import { FilterIcon as FilterXIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Menu, MenuItem, MenuPopup, MenuTrigger } from "@/components/ui/menu"
+import {
+  Menu,
+  MenuPopup,
+  MenuRadioGroup,
+  MenuRadioItem,
+  MenuTrigger,
+} from "@/components/ui/menu"
 import { queryApi } from "@/lib/orpc/query"
 
 interface SearchFiltersProps {
@@ -35,6 +41,29 @@ const SAFE_SEARCH_OPTIONS = [
   { value: "2", label: "Strict" },
 ]
 
+const MAJOR_LANGUAGE_CODES = [
+  "en",
+  "zh",
+  "es",
+  "hi",
+  "ar",
+  "pt",
+  "bn",
+  "ru",
+  "ja",
+  "de",
+  "fr",
+  "ko",
+  "it",
+  "tr",
+  "vi",
+  "pl",
+  "uk",
+  "nl",
+  "th",
+  "id",
+]
+
 const SearchFilters = ({
   timeRange,
   region,
@@ -55,16 +84,24 @@ const SearchFilters = ({
 
   const languages = useMemo(() => languagesData ?? [], [languagesData])
 
+  const majorLanguages = useMemo(
+    () =>
+      languages.filter((lang: { code: string; name: string }) =>
+        MAJOR_LANGUAGE_CODES.includes(lang.code),
+      ),
+    [languages],
+  )
+
   const filteredLanguages = useMemo(() => {
-    if (!languageSearchQuery) return languages
+    if (!languageSearchQuery) return majorLanguages
 
     const query = languageSearchQuery.toLowerCase()
-    return languages.filter(
+    return majorLanguages.filter(
       (lang: { code: string; name: string }) =>
         lang.name.toLowerCase().includes(query) ||
         lang.code.toLowerCase().includes(query),
     )
-  }, [languageSearchQuery, languages])
+  }, [languageSearchQuery, majorLanguages])
 
   const hasActiveFilters =
     timeRange !== "" || region !== "" || safeSearch !== "2" || language !== ""
@@ -85,14 +122,13 @@ const SearchFilters = ({
           }
         />
         <MenuPopup>
-          {TIME_RANGES.map((option) => (
-            <MenuItem
-              key={option.value}
-              onClick={() => onTimeRangeChange(option.value)}
-            >
-              {option.label}
-            </MenuItem>
-          ))}
+          <MenuRadioGroup value={timeRange} onValueChange={onTimeRangeChange}>
+            {TIME_RANGES.map((option) => (
+              <MenuRadioItem key={option.value} value={option.value}>
+                {option.label}
+              </MenuRadioItem>
+            ))}
+          </MenuRadioGroup>
         </MenuPopup>
       </Menu>
 
@@ -118,18 +154,20 @@ const SearchFilters = ({
               className="h-8"
             />
           </div>
-          <MenuItem onClick={() => onLanguageChange("")}>Auto</MenuItem>
-          {filteredLanguages.map((lang: { code: string; name: string }) => (
-            <MenuItem
-              key={lang.code}
-              onClick={() => {
-                onLanguageChange(lang.code)
-                setLanguageSearchQuery("")
-              }}
-            >
-              {lang.name}
-            </MenuItem>
-          ))}
+          <MenuRadioGroup
+            value={language}
+            onValueChange={(value) => {
+              onLanguageChange(value)
+              setLanguageSearchQuery("")
+            }}
+          >
+            <MenuRadioItem value="">Auto</MenuRadioItem>
+            {filteredLanguages.map((lang: { code: string; name: string }) => (
+              <MenuRadioItem key={lang.code} value={lang.code}>
+                {lang.name}
+              </MenuRadioItem>
+            ))}
+          </MenuRadioGroup>
         </MenuPopup>
       </Menu>
 
@@ -144,14 +182,13 @@ const SearchFilters = ({
           }
         />
         <MenuPopup>
-          {SAFE_SEARCH_OPTIONS.map((option) => (
-            <MenuItem
-              key={option.value}
-              onClick={() => onSafeSearchChange(option.value)}
-            >
-              {option.label}
-            </MenuItem>
-          ))}
+          <MenuRadioGroup value={safeSearch} onValueChange={onSafeSearchChange}>
+            {SAFE_SEARCH_OPTIONS.map((option) => (
+              <MenuRadioItem key={option.value} value={option.value}>
+                {option.label}
+              </MenuRadioItem>
+            ))}
+          </MenuRadioGroup>
         </MenuPopup>
       </Menu>
 

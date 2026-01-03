@@ -197,6 +197,33 @@ const SearchInterface = ({
     enabled: !!session,
   })
 
+  const hasAppliedDefaultsRef = useRef(false)
+
+  useEffect(() => {
+    if (!userSettings || hasAppliedDefaultsRef.current) {
+      return
+    }
+
+    const urlParams = new URLSearchParams(window.location.search)
+    const hasLanguageParam = urlParams.has("lang")
+    const hasTimeRangeParam = urlParams.has("timeRange")
+    const hasSafeSearchParam = urlParams.has("safeSearch")
+
+    if (!hasLanguageParam && userSettings.defaultLanguage) {
+      void setLanguage(userSettings.defaultLanguage)
+    }
+
+    if (!hasTimeRangeParam && userSettings.defaultTimeRange) {
+      void setTimeRange(userSettings.defaultTimeRange)
+    }
+
+    if (!hasSafeSearchParam && userSettings.defaultSafeSearch) {
+      void setSafeSearch(userSettings.defaultSafeSearch)
+    }
+
+    hasAppliedDefaultsRef.current = true
+  }, [userSettings, setLanguage, setTimeRange, setSafeSearch])
+
   const { data: carouselImages, isLoading: isLoadingImages } = useQuery({
     ...queryApi.search.getImages.queryOptions({
       input: {
