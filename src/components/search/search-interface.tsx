@@ -10,6 +10,7 @@ import {
 import { parseAsString, parseAsStringLiteral, useQueryState } from "nuqs"
 
 import Logo from "@/components/logo"
+import AddSearchEngineButton from "@/components/search/add-search-engine-button"
 import ImageCarousel from "@/components/search/image-carousel"
 import ImageResultCard from "@/components/search/image-result-card"
 import ImageViewer from "@/components/search/image-viewer"
@@ -540,13 +541,23 @@ const SearchInterface = ({
           <h1 className="text-4xl font-semibold">Yopem</h1>
         </div>
 
-        <div className="w-full max-w-2xl">
-          <SearchAutocomplete
-            value={query}
-            onChange={setQuery}
-            onSubmit={handleSearch}
-            placeholder="Search without being tracked"
-          />
+        <div className="w-full max-w-2xl space-y-4">
+          <form
+            action="/search"
+            method="get"
+            onSubmit={(e) => {
+              e.preventDefault()
+              handleSearch()
+            }}
+          >
+            <SearchAutocomplete
+              value={query}
+              onChange={setQuery}
+              onSubmit={handleSearch}
+              placeholder="Search without being tracked"
+            />
+          </form>
+          <AddSearchEngineButton />
         </div>
       </div>
     )

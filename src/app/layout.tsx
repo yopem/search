@@ -70,6 +70,14 @@ export default async function RootLayout({
       className={`${adwaitaSans.variable} ${adwaitaMono.variable}`}
       suppressHydrationWarning
     >
+      <head>
+        <link
+          rel="search"
+          type="application/opensearchdescription+xml"
+          href="/opensearch.xml"
+          title={siteTitle}
+        />
+      </head>
       <body>
         <Providers>
           <SiteHeader session={session || null} />

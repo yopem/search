@@ -42,6 +42,8 @@ const SearchHeader = ({
           </Link>
 
           <form
+            action="/search"
+            method="get"
             onSubmit={(e) => {
               e.preventDefault()
               onSearch()

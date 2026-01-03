@@ -128,6 +128,7 @@ const SearchAutocomplete = ({
       <div className="relative">
         <Input
           type="search"
+          name="q"
           placeholder={placeholder}
           value={value}
           onChange={handleInputChange}
@@ -139,8 +140,7 @@ const SearchAutocomplete = ({
           autoComplete="off"
         />
         <button
-          type="button"
-          onClick={handleSubmit}
+          type="submit"
           className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2 transition-colors"
           aria-label="Search"
         >
