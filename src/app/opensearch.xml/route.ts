@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 
 import { siteDescription, siteTitle } from "@/lib/env/client"
 
-export async function GET(request: Request) {
+export function GET(request: Request) {
   const url = new URL(request.url)
   const baseUrl = `${url.protocol}//${url.host}`
   const searchUrl = `${baseUrl}/search?q={searchTerms}`

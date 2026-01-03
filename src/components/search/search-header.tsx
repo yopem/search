@@ -54,6 +54,8 @@ const SearchHeader = ({
               value={query}
               onChange={onQueryChange}
               onSubmit={onSearch}
+              showKbdHint={true}
+              alwaysShowKbd={true}
             />
           </form>
 

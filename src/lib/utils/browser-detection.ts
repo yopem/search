@@ -40,24 +40,24 @@ export function getBrowserInfo(): BrowserInfo {
 
   if (userAgent.includes("edg/")) {
     name = "edge"
-    const match = userAgent.match(/edg\/(\d+)/)
-    version = match?.[1] || ""
+    const match = /edg\/(\d+)/.exec(userAgent)
+    version = match?.[1] ?? ""
   } else if (userAgent.includes("chrome/") && !userAgent.includes("edg/")) {
     name = "chrome"
-    const match = userAgent.match(/chrome\/(\d+)/)
-    version = match?.[1] || ""
+    const match = /chrome\/(\d+)/.exec(userAgent)
+    version = match?.[1] ?? ""
   } else if (userAgent.includes("firefox/")) {
     name = "firefox"
-    const match = userAgent.match(/firefox\/(\d+)/)
-    version = match?.[1] || ""
+    const match = /firefox\/(\d+)/.exec(userAgent)
+    version = match?.[1] ?? ""
   } else if (
     userAgent.includes("safari/") &&
     !userAgent.includes("chrome/") &&
     !userAgent.includes("chromium/")
   ) {
     name = "safari"
-    const match = userAgent.match(/version\/(\d+)/)
-    version = match?.[1] || ""
+    const match = /version\/(\d+)/.exec(userAgent)
+    version = match?.[1] ?? ""
   }
 
   const canInstallSearchEngine =

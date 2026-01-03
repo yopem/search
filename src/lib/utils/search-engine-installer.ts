@@ -9,9 +9,9 @@ interface SearchProviderExternal {
   IsSearchProviderInstalled?: (url: string) => number
 }
 
-export async function installSearchEngine(
+export function installSearchEngine(
   browserInfo: BrowserInfo,
-): Promise<InstallationResult> {
+): InstallationResult {
   const { name, isMobile } = browserInfo
 
   try {
@@ -29,7 +29,7 @@ export async function installSearchEngine(
       instructions:
         "Your browser does not support automatic search engine installation.",
     }
-  } catch (error) {
+  } catch {
     return {
       success: false,
       error: "Installation failed",
@@ -72,7 +72,7 @@ function installFirefox(): InstallationResult {
         success: true,
         message: "Search engine added successfully!",
       }
-    } catch (error) {
+    } catch {
       return {
         success: false,
         error: "Installation failed",

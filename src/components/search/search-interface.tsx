@@ -470,6 +470,16 @@ const SearchInterface = ({
         return
       }
 
+      if ((e.ctrlKey || e.metaKey) && e.key === "k") {
+        e.preventDefault()
+        const searchInput = document.querySelector(
+          'input[type="search"], input[type="text"]',
+        )
+        if (searchInput instanceof HTMLInputElement) {
+          searchInput.focus()
+        }
+      }
+
       if (e.key === "/" && mode === "results") {
         e.preventDefault()
         const searchInput = document.querySelector('input[type="text"]')
@@ -478,8 +488,10 @@ const SearchInterface = ({
         }
       }
 
-      if (e.key === "Escape" && mode === "results") {
-        const searchInput = document.querySelector('input[type="text"]')
+      if (e.key === "Escape") {
+        const searchInput = document.querySelector(
+          'input[type="search"], input[type="text"]',
+        )
         if (
           searchInput instanceof HTMLInputElement &&
           searchInput === document.activeElement
@@ -503,18 +515,20 @@ const SearchInterface = ({
         }
       }
 
-      if (e.key === "1") {
-        e.preventDefault()
-        void setCategory("general")
-      } else if (e.key === "2") {
-        e.preventDefault()
-        void setCategory("images")
-      } else if (e.key === "3") {
-        e.preventDefault()
-        void setCategory("videos")
-      } else if (e.key === "4") {
-        e.preventDefault()
-        void setCategory("news")
+      if (mode === "results") {
+        if (e.key === "1") {
+          e.preventDefault()
+          void setCategory("general")
+        } else if (e.key === "2") {
+          e.preventDefault()
+          void setCategory("images")
+        } else if (e.key === "3") {
+          e.preventDefault()
+          void setCategory("videos")
+        } else if (e.key === "4") {
+          e.preventDefault()
+          void setCategory("news")
+        }
       }
     }
 
@@ -555,6 +569,7 @@ const SearchInterface = ({
               onChange={setQuery}
               onSubmit={handleSearch}
               placeholder="Search without being tracked"
+              showKbdHint={true}
             />
           </form>
           <AddSearchEngineButton />

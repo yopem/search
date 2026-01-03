@@ -48,12 +48,12 @@ const AddSearchEngineButton = () => {
     setIsDismissed(true)
   }
 
-  const handleInstall = async () => {
+  const handleInstall = () => {
     setIsInstalling(true)
     setResult(null)
 
     const info = getBrowserInfo()
-    const installResult = await installSearchEngine(info)
+    const installResult = installSearchEngine(info)
 
     setResult(installResult)
     setIsInstalling(false)
