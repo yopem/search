@@ -589,9 +589,7 @@ const SearchInterface = ({
                 allResults.length > 0 &&
                 data?.pages[0] && (
                   <div className="text-muted-foreground mb-4 text-sm">
-                    {allResults.length.toLocaleString()}+ results (
-                    {(data.pages[0]._meta.responseTime / 1000).toFixed(2)}{" "}
-                    seconds)
+                    {allResults.length.toLocaleString()}+ results
                   </div>
                 )}
 
