@@ -31,6 +31,7 @@ import VideoResultCard from "@/components/search/video-result-card"
 import WebResultCard from "@/components/search/web-result-card"
 import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
+import { useMediaQuery } from "@/hooks/use-media-query"
 import { queryApi } from "@/lib/orpc/query"
 
 interface SearchResult {
@@ -90,6 +91,7 @@ const SearchInterface = ({
   const pageObserversRef = useRef<IntersectionObserver[]>([])
   const lastObserverPageRef = useRef<string | null>(null)
   const manualPageChangeRef = useRef<boolean>(false)
+  const isDesktop = useMediaQuery("(min-width: 1024px)")
 
   const initialQuery = mode === "results" ? (searchParams.get("q") ?? "") : ""
 
@@ -260,7 +262,7 @@ const SearchInterface = ({
   }, [fetchNextPage, hasNextPage, isFetchingNextPage, isInfiniteScrollEnabled])
 
   useEffect(() => {
-    if (!data?.pages || mode !== "results") {
+    if (!data?.pages || mode !== "results" || isInfiniteScrollEnabled) {
       return
     }
 
@@ -305,7 +307,7 @@ const SearchInterface = ({
       pageObserversRef.current.forEach((observer) => observer.disconnect())
       pageObserversRef.current = []
     }
-  }, [data?.pages, mode, setPage, page])
+  }, [data?.pages, mode, setPage, page, isInfiniteScrollEnabled])
 
   useEffect(() => {
     if (
@@ -613,6 +615,34 @@ const SearchInterface = ({
                 <SearchEmpty query={initialQuery} />
               )}
 
+              {!isDesktop &&
+                isLoading &&
+                category === "general" &&
+                (userSettings?.showInfoboxPanels ?? true) && (
+                  <div className="mb-4">
+                    <InfoboxPanelSkeleton />
+                  </div>
+                )}
+
+              {!isDesktop &&
+                !isLoading &&
+                !error &&
+                category === "general" &&
+                (userSettings?.showInfoboxPanels ?? true) &&
+                data?.pages[0]?.infobox && (
+                  <div className="mb-4">
+                    <InfoboxPanel
+                      type={data.pages[0].infobox.type}
+                      title={data.pages[0].infobox.title}
+                      image={data.pages[0].infobox.image}
+                      summary={data.pages[0].infobox.summary}
+                      attributes={data.pages[0].infobox.attributes}
+                      source={data.pages[0].infobox.source}
+                      sourceUrl={data.pages[0].infobox.sourceUrl}
+                    />
+                  </div>
+                )}
+
               {!isLoading && !error && allResults.length > 0 && (
                 <>
                   <div
@@ -803,12 +833,14 @@ const SearchInterface = ({
                     </div>
                   )}
 
-                  <div
-                    ref={loadMoreRef}
-                    className="h-20 w-full"
-                    aria-live="polite"
-                    aria-busy={isFetchingNextPage}
-                  />
+                  {isInfiniteScrollEnabled && (
+                    <div
+                      ref={loadMoreRef}
+                      className="h-20 w-full"
+                      aria-live="polite"
+                      aria-busy={isFetchingNextPage}
+                    />
+                  )}
 
                   {!hasNextPage && allResults.length > 0 && (
                     <div className="flex justify-center py-8">
@@ -819,10 +851,18 @@ const SearchInterface = ({
                   )}
                 </>
               )}
+
+              {!isDesktop &&
+                category !== "images" &&
+                !isLoading &&
+                !error &&
+                allResults.length > 0 && (
+                  <RelatedSearches query={initialQuery} category={category} />
+                )}
             </div>
 
-            {category !== "images" && (
-              <div className="hidden w-100 shrink-0 lg:block">
+            {isDesktop && category !== "images" && (
+              <div className="w-100 shrink-0">
                 <div className="sticky top-35 space-y-6">
                   {isLoading &&
                     category === "general" &&
