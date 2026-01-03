@@ -203,8 +203,11 @@ const SearchInterface = ({
   useEffect(() => {
     if (mode === "results") {
       setQuery(initialQuery)
+      if (category !== "images") {
+        setIsInfiniteScrollEnabled(false)
+      }
     }
-  }, [initialQuery, mode])
+  }, [initialQuery, mode, category])
 
   useEffect(() => {
     if (mode !== "results") {
@@ -227,10 +230,8 @@ const SearchInterface = ({
   useEffect(() => {
     if (category === "images") {
       setIsInfiniteScrollEnabled(true)
-    } else {
-      setIsInfiniteScrollEnabled(false)
     }
-  }, [initialQuery, category])
+  }, [category])
 
   useEffect(() => {
     if (!isInfiniteScrollEnabled) {
@@ -307,7 +308,12 @@ const SearchInterface = ({
   }, [data?.pages, mode, setPage, page])
 
   useEffect(() => {
-    if (!page || mode !== "results" || !data?.pages) {
+    if (
+      !page ||
+      mode !== "results" ||
+      !data?.pages ||
+      isInfiniteScrollEnabled
+    ) {
       return
     }
 
@@ -341,7 +347,15 @@ const SearchInterface = ({
         manualPageChangeRef.current = false
       }, 1000)
     }
-  }, [page, mode, data?.pages, hasNextPage, isFetchingNextPage, fetchNextPage])
+  }, [
+    page,
+    mode,
+    data?.pages,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+    isInfiniteScrollEnabled,
+  ])
 
   const queryClient = useQueryClient()
 
