@@ -154,7 +154,7 @@ const SearchInterface = ({
 
   const [safeSearch, setSafeSearch] = useQueryState(
     "safeSearch",
-    parseAsString.withDefault("1"),
+    parseAsString.withDefault("2"),
   )
 
   const {
@@ -608,7 +608,7 @@ const SearchInterface = ({
                 onClearFilters={() => {
                   void setTimeRange("")
                   void setRegion("")
-                  void setSafeSearch("1")
+                  void setSafeSearch("2")
                 }}
               />
 

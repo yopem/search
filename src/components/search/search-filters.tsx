@@ -51,7 +51,7 @@ const SearchFilters = ({
   onClearFilters,
 }: SearchFiltersProps) => {
   const hasActiveFilters =
-    timeRange !== "" || region !== "" || safeSearch !== "1"
+    timeRange !== "" || region !== "" || safeSearch !== "2"
 
   return (
     <div className="flex flex-wrap items-center gap-2 py-3">
