@@ -1,0 +1,123 @@
+export interface Language {
+  code: string
+  name: string
+  flag?: string
+}
+
+export const LANGUAGES: Language[] = [
+  { code: "", name: "Auto-detect" },
+  { code: "ar", name: "العربية [ar]", flag: "🌐" },
+  { code: "bg", name: "Български [bg]", flag: "🌐" },
+  { code: "ca", name: "Català [ca]", flag: "🌐" },
+  { code: "cs", name: "Čeština [cs]", flag: "🌐" },
+  { code: "da", name: "Dansk [da]", flag: "🌐" },
+  { code: "da-DK", name: "Dansk-Danmark [da-DK]", flag: "🇩🇰" },
+  { code: "de", name: "Deutsch [de]", flag: "🌐" },
+  { code: "de-AT", name: "Deutsch-Österreich [de-AT]", flag: "🇦🇹" },
+  { code: "de-CH", name: "Deutsch-Schweiz [de-CH]", flag: "🇨🇭" },
+  { code: "de-DE", name: "Deutsch-Deutschland [de-DE]", flag: "🇩🇪" },
+  { code: "el", name: "Ελληνικά [el]", flag: "🌐" },
+  { code: "en", name: "English [en]", flag: "🌐" },
+  { code: "en-AU", name: "English-Australia [en-AU]", flag: "🇦🇺" },
+  { code: "en-CA", name: "English-Canada [en-CA]", flag: "🇨🇦" },
+  { code: "en-GB", name: "English-United Kingdom [en-GB]", flag: "🇬🇧" },
+  { code: "en-US", name: "English-United States [en-US]", flag: "🇺🇸" },
+  { code: "es", name: "Español [es]", flag: "🌐" },
+  { code: "es-AR", name: "Español-Argentina [es-AR]", flag: "🇦🇷" },
+  { code: "es-ES", name: "Español-España [es-ES]", flag: "🇪🇸" },
+  { code: "es-MX", name: "Español-México [es-MX]", flag: "🇲🇽" },
+  { code: "et", name: "Eesti [et]", flag: "🌐" },
+  { code: "fa", name: "فارسی [fa]", flag: "🌐" },
+  { code: "fi", name: "Suomi [fi]", flag: "🌐" },
+  { code: "fi-FI", name: "Suomi-Suomi [fi-FI]", flag: "🇫🇮" },
+  { code: "fr", name: "Français [fr]", flag: "🌐" },
+  { code: "fr-CA", name: "Français-Canada [fr-CA]", flag: "🇨🇦" },
+  { code: "fr-CH", name: "Français-Suisse [fr-CH]", flag: "🇨🇭" },
+  { code: "fr-FR", name: "Français-France [fr-FR]", flag: "🇫🇷" },
+  { code: "he", name: "עברית [he]", flag: "🇮🇱" },
+  { code: "hi", name: "हिन्दी [hi]", flag: "🌐" },
+  { code: "hr", name: "Hrvatski [hr]", flag: "🌐" },
+  { code: "hu", name: "Magyar [hu]", flag: "🌐" },
+  { code: "hu-HU", name: "Magyar-Magyarország [hu-HU]", flag: "🇭🇺" },
+  { code: "id", name: "Indonesia [id]", flag: "🌐" },
+  { code: "id-ID", name: "Indonesia-Indonesia [id-ID]", flag: "🇮🇩" },
+  { code: "it", name: "Italiano [it]", flag: "🌐" },
+  { code: "it-IT", name: "Italiano-Italia [it-IT]", flag: "🇮🇹" },
+  { code: "ja", name: "日本語 [ja]", flag: "🌐" },
+  { code: "ja-JP", name: "日本語-日本 [ja-JP]", flag: "🇯🇵" },
+  { code: "ko", name: "한국어 [ko]", flag: "🌐" },
+  { code: "ko-KR", name: "한국어-대한민국 [ko-KR]", flag: "🇰🇷" },
+  { code: "lt", name: "Lietuvių [lt]", flag: "🌐" },
+  { code: "lv", name: "Latviešu [lv]", flag: "🌐" },
+  { code: "nb", name: "Norsk Bokmål [nb]", flag: "🌐" },
+  { code: "nb-NO", name: "Norsk Bokmål-Norge [nb-NO]", flag: "🇳🇴" },
+  { code: "nl", name: "Nederlands [nl]", flag: "🌐" },
+  { code: "nl-NL", name: "Nederlands-Nederland [nl-NL]", flag: "🇳🇱" },
+  { code: "pl", name: "Polski [pl]", flag: "🌐" },
+  { code: "pl-PL", name: "Polski-Polska [pl-PL]", flag: "🇵🇱" },
+  { code: "pt", name: "Português [pt]", flag: "🌐" },
+  { code: "pt-BR", name: "Português-Brasil [pt-BR]", flag: "🇧🇷" },
+  { code: "pt-PT", name: "Português-Portugal [pt-PT]", flag: "🇵🇹" },
+  { code: "ro", name: "Română [ro]", flag: "🌐" },
+  { code: "ru", name: "Русский [ru]", flag: "🌐" },
+  { code: "ru-RU", name: "Русский-Россия [ru-RU]", flag: "🇷🇺" },
+  { code: "sk", name: "Slovenčina [sk]", flag: "🌐" },
+  { code: "sl", name: "Slovenščina [sl]", flag: "🌐" },
+  { code: "sv", name: "Svenska [sv]", flag: "🌐" },
+  { code: "sv-SE", name: "Svenska-Sverige [sv-SE]", flag: "🇸🇪" },
+  { code: "th", name: "ไทย [th]", flag: "🌐" },
+  { code: "th-TH", name: "ไทย-ไทย [th-TH]", flag: "🇹🇭" },
+  { code: "tr", name: "Türkçe [tr]", flag: "🌐" },
+  { code: "tr-TR", name: "Türkçe-Türkiye [tr-TR]", flag: "🇹🇷" },
+  { code: "uk", name: "Українська [uk]", flag: "🌐" },
+  { code: "vi", name: "Tiếng Việt [vi]", flag: "🌐" },
+  { code: "vi-VN", name: "Tiếng Việt-Việt Nam [vi-VN]", flag: "🇻🇳" },
+  { code: "zh", name: "中文 [zh]", flag: "🌐" },
+  { code: "zh-CN", name: "中文-中国 [zh-CN]", flag: "🇨🇳" },
+  { code: "zh-TW", name: "中文-台灣 [zh-TW]", flag: "🇹🇼" },
+]
+
+export const MAJOR_LANGUAGES: Language[] = [
+  { code: "", name: "Auto-detect" },
+  { code: "en", name: "English [en]", flag: "🌐" },
+  { code: "en-US", name: "English-United States [en-US]", flag: "🇺🇸" },
+  { code: "en-GB", name: "English-United Kingdom [en-GB]", flag: "🇬🇧" },
+  { code: "es", name: "Español [es]", flag: "🌐" },
+  { code: "es-ES", name: "Español-España [es-ES]", flag: "🇪🇸" },
+  { code: "es-MX", name: "Español-México [es-MX]", flag: "🇲🇽" },
+  { code: "fr", name: "Français [fr]", flag: "🌐" },
+  { code: "fr-FR", name: "Français-France [fr-FR]", flag: "🇫🇷" },
+  { code: "de", name: "Deutsch [de]", flag: "🌐" },
+  { code: "de-DE", name: "Deutsch-Deutschland [de-DE]", flag: "🇩🇪" },
+  { code: "it", name: "Italiano [it]", flag: "🌐" },
+  { code: "pt", name: "Português [pt]", flag: "🌐" },
+  { code: "pt-BR", name: "Português-Brasil [pt-BR]", flag: "🇧🇷" },
+  { code: "zh", name: "中文 [zh]", flag: "🌐" },
+  { code: "zh-CN", name: "中文-中国 [zh-CN]", flag: "🇨🇳" },
+  { code: "ja", name: "日本語 [ja]", flag: "🌐" },
+  { code: "ja-JP", name: "日本語-日本 [ja-JP]", flag: "🇯🇵" },
+  { code: "ko", name: "한국어 [ko]", flag: "🌐" },
+  { code: "ru", name: "Русский [ru]", flag: "🌐" },
+  { code: "ar", name: "العربية [ar]", flag: "🌐" },
+  { code: "hi", name: "हिन्दी [hi]", flag: "🌐" },
+  { code: "id", name: "Indonesia [id]", flag: "🌐" },
+  { code: "nl", name: "Nederlands [nl]", flag: "🌐" },
+  { code: "pl", name: "Polski [pl]", flag: "🌐" },
+  { code: "tr", name: "Türkçe [tr]", flag: "🌐" },
+  { code: "sv", name: "Svenska [sv]", flag: "🌐" },
+  { code: "th", name: "ไทย [th]", flag: "🌐" },
+  { code: "vi", name: "Tiếng Việt [vi]", flag: "🌐" },
+]
+
+export function getLanguage(code: string): Language | undefined {
+  return LANGUAGES.find((lang) => lang.code === code)
+}
+
+export function searchLanguages(query: string): Language[] {
+  const lowerQuery = query.toLowerCase()
+  return LANGUAGES.filter(
+    (lang) =>
+      lang.name.toLowerCase().includes(lowerQuery) ||
+      lang.code.toLowerCase().includes(lowerQuery),
+  )
+}

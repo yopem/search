@@ -21,6 +21,7 @@ interface SearchHeaderProps {
     email: string
     name: string | null
   } | null
+  language?: string
 }
 
 const SearchHeader = ({
@@ -31,6 +32,7 @@ const SearchHeader = ({
   onCategoryChange,
   onCategoryHover,
   session,
+  language,
 }: SearchHeaderProps) => {
   return (
     <div className="bg-background/80 fixed top-0 right-0 left-0 z-50 border-b backdrop-blur-sm">
@@ -56,6 +58,7 @@ const SearchHeader = ({
               onSubmit={onSearch}
               showKbdHint={true}
               alwaysShowKbd={true}
+              language={language}
             />
           </form>
 

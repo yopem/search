@@ -1,17 +1,23 @@
 "use client"
 
+import { useMemo, useState } from "react"
+import { useQuery } from "@tanstack/react-query"
 import { FilterIcon as FilterXIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { Menu, MenuItem, MenuPopup, MenuTrigger } from "@/components/ui/menu"
+import { queryApi } from "@/lib/orpc/query"
 
 interface SearchFiltersProps {
   timeRange: string
   region: string
   safeSearch: string
+  language: string
   onTimeRangeChange: (value: string) => void
   onRegionChange: (value: string) => void
   onSafeSearchChange: (value: string) => void
+  onLanguageChange: (value: string) => void
   onClearFilters: () => void
 }
 
@@ -45,13 +51,40 @@ const SearchFilters = ({
   timeRange,
   region,
   safeSearch,
+  language,
   onTimeRangeChange,
   onRegionChange,
   onSafeSearchChange,
+  onLanguageChange,
   onClearFilters,
 }: SearchFiltersProps) => {
+  const [languageSearchQuery, setLanguageSearchQuery] = useState("")
+
+  const { data: languagesData } = useQuery(
+    queryApi.search.getLanguages.queryOptions({
+      input: {},
+    }),
+  )
+
+  const languages = useMemo(() => languagesData ?? [], [languagesData])
+
+  const filteredLanguages = useMemo(() => {
+    if (!languageSearchQuery) return languages
+
+    const query = languageSearchQuery.toLowerCase()
+    return languages.filter(
+      (lang: { code: string; name: string }) =>
+        lang.name.toLowerCase().includes(query) ||
+        lang.code.toLowerCase().includes(query),
+    )
+  }, [languageSearchQuery, languages])
+
   const hasActiveFilters =
-    timeRange !== "" || region !== "" || safeSearch !== "2"
+    timeRange !== "" || region !== "" || safeSearch !== "2" || language !== ""
+
+  const selectedLanguage = languages.find(
+    (lang: { code: string; name: string }) => lang.code === language,
+  )
 
   return (
     <div className="flex flex-wrap items-center gap-2 py-3">
@@ -71,6 +104,39 @@ const SearchFilters = ({
               onClick={() => onTimeRangeChange(option.value)}
             >
               {option.label}
+            </MenuItem>
+          ))}
+        </MenuPopup>
+      </Menu>
+
+      <Menu>
+        <MenuTrigger
+          render={
+            <Button variant="outline" size="sm">
+              {selectedLanguage ? selectedLanguage.name : "Language"}
+            </Button>
+          }
+        />
+        <MenuPopup>
+          <div className="p-2">
+            <Input
+              type="text"
+              placeholder="Search languages..."
+              value={languageSearchQuery}
+              onChange={(e) => setLanguageSearchQuery(e.target.value)}
+              className="h-8"
+            />
+          </div>
+          <MenuItem onClick={() => onLanguageChange("")}>Auto</MenuItem>
+          {filteredLanguages.map((lang: { code: string; name: string }) => (
+            <MenuItem
+              key={lang.code}
+              onClick={() => {
+                onLanguageChange(lang.code)
+                setLanguageSearchQuery("")
+              }}
+            >
+              {lang.name}
             </MenuItem>
           ))}
         </MenuPopup>

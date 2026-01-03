@@ -16,6 +16,7 @@ interface SearchAutocompleteProps {
   placeholder?: string
   showKbdHint?: boolean
   alwaysShowKbd?: boolean
+  language?: string
 }
 
 const useDebounce = (value: string, delay: number) => {
@@ -41,6 +42,7 @@ const SearchAutocomplete = ({
   placeholder = "Search the web...",
   showKbdHint = false,
   alwaysShowKbd = false,
+  language,
 }: SearchAutocompleteProps) => {
   const [isOpen, setIsOpen] = useState(false)
   const [highlightedIndex, setHighlightedIndex] = useState(-1)
@@ -57,7 +59,10 @@ const SearchAutocomplete = ({
 
   const { data: suggestions = [] } = useQuery({
     ...queryApi.search.autocomplete.queryOptions({
-      input: { query: debouncedValue },
+      input: {
+        query: debouncedValue,
+        language: language ?? undefined,
+      },
     }),
     enabled: debouncedValue.length > 1,
     staleTime: 5 * 60 * 1000,

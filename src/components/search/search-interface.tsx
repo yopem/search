@@ -34,6 +34,7 @@ import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
 import { useMediaQuery } from "@/hooks/use-media-query"
 import { queryApi } from "@/lib/orpc/query"
+import { detectLanguage } from "@/lib/utils/language-detection"
 
 interface SearchResult {
   title: string
@@ -157,6 +158,11 @@ const SearchInterface = ({
     parseAsString.withDefault("2"),
   )
 
+  const [language, setLanguage] = useQueryState(
+    "lang",
+    parseAsString.withDefault(""),
+  )
+
   const {
     data,
     fetchNextPage,
@@ -174,6 +180,7 @@ const SearchInterface = ({
         timeRange: timeRange || undefined,
         region: region || undefined,
         safeSearch: safeSearch || undefined,
+        language: language || undefined,
       }),
       initialPageParam: 1,
       getNextPageParam: (lastPage, allPages) => {
@@ -196,12 +203,16 @@ const SearchInterface = ({
         query: initialQuery || "",
         region: region || undefined,
         safeSearch: safeSearch || undefined,
+        language: language || undefined,
       },
     }),
     enabled: mode === "results" && !!initialQuery && category === "general",
   })
 
   const allResults = data?.pages.flatMap((page) => page.results) ?? []
+
+  const detectedLanguage = detectLanguage(query)
+  const autocompleteLanguage = detectedLanguage ?? (language || undefined)
 
   useEffect(() => {
     if (mode === "results") {
@@ -570,6 +581,7 @@ const SearchInterface = ({
               onSubmit={handleSearch}
               placeholder="Search without being tracked"
               showKbdHint={true}
+              language={autocompleteLanguage}
             />
           </form>
           <AddSearchEngineButton />
@@ -588,6 +600,7 @@ const SearchInterface = ({
         onCategoryChange={handleCategoryChange}
         onCategoryHover={handleCategoryHover}
         session={session ?? null}
+        language={autocompleteLanguage}
       />
 
       <div className="pt-30">
@@ -602,13 +615,16 @@ const SearchInterface = ({
                 timeRange={timeRange}
                 region={region}
                 safeSearch={safeSearch}
+                language={language}
                 onTimeRangeChange={(value) => void setTimeRange(value)}
                 onRegionChange={(value) => void setRegion(value)}
                 onSafeSearchChange={(value) => void setSafeSearch(value)}
+                onLanguageChange={(value) => void setLanguage(value)}
                 onClearFilters={() => {
                   void setTimeRange("")
                   void setRegion("")
                   void setSafeSearch("2")
+                  void setLanguage("")
                 }}
               />
 

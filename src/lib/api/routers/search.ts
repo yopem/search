@@ -41,10 +41,12 @@ const searchInputSchema = z.object({
   timeRange: z.string().optional(),
   region: z.string().optional(),
   safeSearch: z.string().optional(),
+  language: z.string().max(10).optional(),
 })
 
 const autocompleteInputSchema = z.object({
   query: z.string().min(1).max(100),
+  language: z.string().max(10).optional(),
 })
 
 interface SearxngResult {
@@ -256,7 +258,8 @@ export const searchRouter = {
     .input(searchInputSchema)
     .handler(async ({ input, context }) => {
       const startTime = Date.now()
-      const { query, category, page, timeRange, region, safeSearch } = input
+      const { query, category, page, timeRange, region, safeSearch, language } =
+        input
 
       try {
         const params = new URLSearchParams({
@@ -270,8 +273,12 @@ export const searchRouter = {
           params.set("time_range", timeRange)
         }
 
-        if (region) {
+        if (language) {
+          params.set("language", language)
+        } else if (region) {
           params.set("language", region)
+        } else {
+          params.set("language", "en")
         }
 
         if (safeSearch) {
@@ -359,10 +366,11 @@ export const searchRouter = {
         query: z.string(),
         region: z.string().optional(),
         safeSearch: z.string().optional(),
+        language: z.string().max(10).optional(),
       }),
     )
     .handler(async ({ input }) => {
-      const { query, region, safeSearch } = input
+      const { query, region, safeSearch, language } = input
 
       try {
         const imageParams = new URLSearchParams({
@@ -372,8 +380,12 @@ export const searchRouter = {
           pageno: "1",
         })
 
-        if (region) {
+        if (language) {
+          imageParams.set("language", language)
+        } else if (region) {
           imageParams.set("language", region)
+        } else {
+          imageParams.set("language", "en")
         }
 
         if (safeSearch) {
@@ -401,12 +413,16 @@ export const searchRouter = {
   autocomplete: publicProcedure
     .input(autocompleteInputSchema)
     .handler(async ({ input }) => {
-      const { query } = input
+      const { query, language } = input
 
       try {
         const params = new URLSearchParams({
           q: query,
         })
+
+        if (language) {
+          params.set("language", language)
+        }
 
         const response = await fetch(`${searxngUrl}/autocompleter?${params}`)
 
@@ -565,4 +581,53 @@ export const searchRouter = {
         })
       }
     }),
+  getLanguages: publicProcedure.handler(async () => {
+    try {
+      const response = await fetch(`${searxngUrl}/config`)
+
+      if (!response.ok) {
+        throw new ORPCError("INTERNAL_SERVER_ERROR", {
+          message: "Failed to fetch SearXNG config",
+        })
+      }
+
+      const config = await response.json()
+
+      const locales: Record<string, string> = config.locales ?? {}
+
+      const languageSet = new Set<string>()
+
+      if (config.engines && Array.isArray(config.engines)) {
+        config.engines.forEach((engine: { languages?: string[] }) => {
+          if (engine.languages && Array.isArray(engine.languages)) {
+            engine.languages.forEach((lang: string) => {
+              if (lang && lang !== "all" && locales[lang]) {
+                languageSet.add(lang)
+              }
+            })
+          }
+        })
+      }
+
+      const languages = Array.from(languageSet)
+        .sort((a, b) => {
+          const nameA = locales[a] || a
+          const nameB = locales[b] || b
+          return nameA.localeCompare(nameB)
+        })
+        .map((code) => ({
+          code,
+          name: locales[code] || code,
+        }))
+
+      return languages
+    } catch (error) {
+      if (error instanceof ORPCError) {
+        throw error
+      }
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: "Failed to fetch languages from SearXNG",
+      })
+    }
+  }),
 }
