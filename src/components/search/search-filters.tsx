@@ -29,18 +29,6 @@ const TIME_RANGES = [
   { value: "year", label: "Past year" },
 ]
 
-const REGIONS = [
-  { value: "", label: "Auto" },
-  { value: "en-US", label: "United States" },
-  { value: "en-GB", label: "United Kingdom" },
-  { value: "de-DE", label: "Germany" },
-  { value: "fr-FR", label: "France" },
-  { value: "ja-JP", label: "Japan" },
-  { value: "es-ES", label: "Spain" },
-  { value: "pt-BR", label: "Brazil" },
-  { value: "id-ID", label: "Indonesia" },
-]
-
 const SAFE_SEARCH_OPTIONS = [
   { value: "0", label: "Off" },
   { value: "1", label: "Moderate" },
@@ -53,7 +41,6 @@ const SearchFilters = ({
   safeSearch,
   language,
   onTimeRangeChange,
-  onRegionChange,
   onSafeSearchChange,
   onLanguageChange,
   onClearFilters,
@@ -113,7 +100,7 @@ const SearchFilters = ({
         <MenuTrigger
           render={
             <Button variant="outline" size="sm">
-              {selectedLanguage ? selectedLanguage.name : "Language"}
+              {selectedLanguage ? selectedLanguage.name : "Auto (English)"}
             </Button>
           }
         />
@@ -123,7 +110,11 @@ const SearchFilters = ({
               type="text"
               placeholder="Search languages..."
               value={languageSearchQuery}
-              onChange={(e) => setLanguageSearchQuery(e.target.value)}
+              onChange={(e) => {
+                e.stopPropagation()
+                setLanguageSearchQuery(e.target.value)
+              }}
+              onKeyDown={(e) => e.stopPropagation()}
               className="h-8"
             />
           </div>
@@ -137,26 +128,6 @@ const SearchFilters = ({
               }}
             >
               {lang.name}
-            </MenuItem>
-          ))}
-        </MenuPopup>
-      </Menu>
-
-      <Menu>
-        <MenuTrigger
-          render={
-            <Button variant="outline" size="sm">
-              {REGIONS.find((r) => r.value === region)?.label ?? "Auto"}
-            </Button>
-          }
-        />
-        <MenuPopup>
-          {REGIONS.map((option) => (
-            <MenuItem
-              key={option.value}
-              onClick={() => onRegionChange(option.value)}
-            >
-              {option.label}
             </MenuItem>
           ))}
         </MenuPopup>
