@@ -163,6 +163,174 @@ const SettingsContent = () => {
     })
   }
 
+  const handleToggleImagesCategory = (checked: boolean) => {
+    if (!checked) {
+      const enabledCount = [
+        settings?.showImagesCategory,
+        settings?.showNewsCategory,
+        settings?.showVideosCategory,
+        settings?.showMusicCategory,
+        settings?.showMapCategory,
+        settings?.showScienceCategory,
+        settings?.showFilesCategory,
+        settings?.showSocialMediaCategory,
+        settings?.showTechCategory,
+      ].filter(Boolean).length
+
+      if (enabledCount <= 1) {
+        toastManager.add({
+          title: "Cannot disable category",
+          description: "At least one category must be visible",
+        })
+        return
+      }
+    }
+
+    updateMutation.mutate({ showImagesCategory: checked })
+    toastManager.add({
+      title: "Settings updated",
+      description: checked
+        ? "Images category enabled"
+        : "Images category hidden",
+    })
+  }
+
+  const handleToggleNewsCategory = (checked: boolean) => {
+    if (!checked) {
+      const enabledCount = [
+        settings?.showImagesCategory,
+        settings?.showNewsCategory,
+        settings?.showVideosCategory,
+        settings?.showMusicCategory,
+        settings?.showMapCategory,
+        settings?.showScienceCategory,
+        settings?.showFilesCategory,
+        settings?.showSocialMediaCategory,
+        settings?.showTechCategory,
+      ].filter(Boolean).length
+
+      if (enabledCount <= 1) {
+        toastManager.add({
+          title: "Cannot disable category",
+          description: "At least one category must be visible",
+        })
+        return
+      }
+    }
+
+    updateMutation.mutate({ showNewsCategory: checked })
+    toastManager.add({
+      title: "Settings updated",
+      description: checked ? "News category enabled" : "News category hidden",
+    })
+  }
+
+  const handleToggleVideosCategory = (checked: boolean) => {
+    if (!checked) {
+      const enabledCount = [
+        settings?.showImagesCategory,
+        settings?.showNewsCategory,
+        settings?.showVideosCategory,
+        settings?.showMusicCategory,
+        settings?.showMapCategory,
+        settings?.showScienceCategory,
+        settings?.showFilesCategory,
+        settings?.showSocialMediaCategory,
+        settings?.showTechCategory,
+      ].filter(Boolean).length
+
+      if (enabledCount <= 1) {
+        toastManager.add({
+          title: "Cannot disable category",
+          description: "At least one category must be visible",
+        })
+        return
+      }
+    }
+
+    updateMutation.mutate({ showVideosCategory: checked })
+    toastManager.add({
+      title: "Settings updated",
+      description: checked
+        ? "Videos category enabled"
+        : "Videos category hidden",
+    })
+  }
+
+  const handleToggleMusicCategory = (checked: boolean) => {
+    if (!checked) {
+      const enabledCount = [
+        settings?.showImagesCategory,
+        settings?.showNewsCategory,
+        settings?.showVideosCategory,
+        settings?.showMusicCategory,
+        settings?.showMapCategory,
+        settings?.showScienceCategory,
+        settings?.showFilesCategory,
+        settings?.showSocialMediaCategory,
+        settings?.showTechCategory,
+      ].filter(Boolean).length
+
+      if (enabledCount <= 1) {
+        toastManager.add({
+          title: "Cannot disable category",
+          description: "At least one category must be visible",
+        })
+        return
+      }
+    }
+
+    updateMutation.mutate({ showMusicCategory: checked })
+    toastManager.add({
+      title: "Settings updated",
+      description: checked ? "Music category enabled" : "Music category hidden",
+    })
+  }
+
+  const handleToggleMapCategory = (checked: boolean) => {
+    updateMutation.mutate({ showMapCategory: checked })
+    toastManager.add({
+      title: "Settings updated",
+      description: checked ? "Map category enabled" : "Map category hidden",
+    })
+  }
+
+  const handleToggleScienceCategory = (checked: boolean) => {
+    updateMutation.mutate({ showScienceCategory: checked })
+    toastManager.add({
+      title: "Settings updated",
+      description: checked
+        ? "Science category enabled"
+        : "Science category hidden",
+    })
+  }
+
+  const handleToggleFilesCategory = (checked: boolean) => {
+    updateMutation.mutate({ showFilesCategory: checked })
+    toastManager.add({
+      title: "Settings updated",
+      description: checked ? "Files category enabled" : "Files category hidden",
+    })
+  }
+
+  const handleToggleSocialMediaCategory = (checked: boolean) => {
+    updateMutation.mutate({ showSocialMediaCategory: checked })
+    toastManager.add({
+      title: "Settings updated",
+      description: checked
+        ? "Social Media category enabled"
+        : "Social Media category hidden",
+    })
+  }
+
+  const handleToggleTechCategory = (checked: boolean) => {
+    updateMutation.mutate({ showTechCategory: checked })
+    toastManager.add({
+      title: "Settings updated",
+      description: checked ? "Tech category enabled" : "Tech category hidden",
+    })
+  }
+
   const handleLanguageChange = (language: string) => {
     updateMutation.mutate({ defaultLanguage: language || null })
     setLanguageSearchQuery("")
@@ -311,6 +479,153 @@ const SettingsContent = () => {
               disabled={updateMutation.isPending}
             />
           </Field>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Search Categories</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="text-muted-foreground text-sm">
+            The All category is always visible and cannot be disabled
+          </div>
+
+          <div className="space-y-4">
+            <div className="text-sm font-medium">Default Categories</div>
+            <div className="text-muted-foreground text-xs">
+              Categories shown by default (can be disabled)
+            </div>
+
+            <Field className="flex flex-row items-center justify-between gap-4">
+              <div className="flex-1">
+                <FieldLabel>Show Images category</FieldLabel>
+                <FieldDescription>Image search results</FieldDescription>
+              </div>
+              <Switch
+                checked={settings?.showImagesCategory ?? true}
+                onCheckedChange={handleToggleImagesCategory}
+                disabled={updateMutation.isPending}
+              />
+            </Field>
+
+            <Field className="flex flex-row items-center justify-between gap-4">
+              <div className="flex-1">
+                <FieldLabel>Show News category</FieldLabel>
+                <FieldDescription>
+                  News articles and current events
+                </FieldDescription>
+              </div>
+              <Switch
+                checked={settings?.showNewsCategory ?? true}
+                onCheckedChange={handleToggleNewsCategory}
+                disabled={updateMutation.isPending}
+              />
+            </Field>
+
+            <Field className="flex flex-row items-center justify-between gap-4">
+              <div className="flex-1">
+                <FieldLabel>Show Videos category</FieldLabel>
+                <FieldDescription>
+                  Video content from various platforms
+                </FieldDescription>
+              </div>
+              <Switch
+                checked={settings?.showVideosCategory ?? true}
+                onCheckedChange={handleToggleVideosCategory}
+                disabled={updateMutation.isPending}
+              />
+            </Field>
+
+            <Field className="flex flex-row items-center justify-between gap-4">
+              <div className="flex-1">
+                <FieldLabel>Show Music category</FieldLabel>
+                <FieldDescription>Songs, albums, and artists</FieldDescription>
+              </div>
+              <Switch
+                checked={settings?.showMusicCategory ?? true}
+                onCheckedChange={handleToggleMusicCategory}
+                disabled={updateMutation.isPending}
+              />
+            </Field>
+          </div>
+
+          <div className="space-y-4">
+            <div className="text-sm font-medium">Additional Categories</div>
+            <div className="text-muted-foreground text-xs">
+              Enable specialized search categories
+            </div>
+
+            <Field className="flex flex-row items-center justify-between gap-4">
+              <div className="flex-1">
+                <FieldLabel>Show Map category</FieldLabel>
+                <FieldDescription>
+                  Search for locations and places
+                </FieldDescription>
+              </div>
+              <Switch
+                checked={settings?.showMapCategory ?? false}
+                onCheckedChange={handleToggleMapCategory}
+                disabled={updateMutation.isPending}
+              />
+            </Field>
+
+            <Field className="flex flex-row items-center justify-between gap-4">
+              <div className="flex-1">
+                <FieldLabel>Show Science category</FieldLabel>
+                <FieldDescription>
+                  Search academic papers and publications
+                </FieldDescription>
+              </div>
+              <Switch
+                checked={settings?.showScienceCategory ?? false}
+                onCheckedChange={handleToggleScienceCategory}
+                disabled={updateMutation.isPending}
+              />
+            </Field>
+
+            <Field className="flex flex-row items-center justify-between gap-4">
+              <div className="flex-1">
+                <FieldLabel>Show Files category</FieldLabel>
+                <FieldDescription>
+                  Search for files, torrents, and downloads
+                </FieldDescription>
+              </div>
+              <Switch
+                checked={settings?.showFilesCategory ?? false}
+                onCheckedChange={handleToggleFilesCategory}
+                disabled={updateMutation.isPending}
+              />
+            </Field>
+
+            <Field className="flex flex-row items-center justify-between gap-4">
+              <div className="flex-1">
+                <FieldLabel>Show Social Media category</FieldLabel>
+                <FieldDescription>
+                  Search posts from Reddit, Mastodon, and Lemmy
+                </FieldDescription>
+              </div>
+              <Switch
+                checked={settings?.showSocialMediaCategory ?? false}
+                onCheckedChange={handleToggleSocialMediaCategory}
+                disabled={updateMutation.isPending}
+              />
+            </Field>
+
+            <Field className="flex flex-row items-center justify-between gap-4">
+              <div className="flex-1">
+                <FieldLabel>Show Tech category</FieldLabel>
+                <FieldDescription>
+                  Search developer resources and IT content
+                </FieldDescription>
+              </div>
+              <Switch
+                checked={settings?.showTechCategory ?? false}
+                onCheckedChange={handleToggleTechCategory}
+                disabled={updateMutation.isPending}
+              />
+            </Field>
+          </div>
         </CardContent>
       </Card>
 

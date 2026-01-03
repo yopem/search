@@ -10,7 +10,18 @@ import {
 } from "@/lib/db/schema"
 import { searxngUrl, tmdbApiKey, weatherApiKey } from "@/lib/env/server"
 
-const searchCategorySchema = z.enum(["general", "images", "videos", "news"])
+const searchCategorySchema = z.enum([
+  "general",
+  "images",
+  "videos",
+  "news",
+  "music",
+  "map",
+  "science",
+  "files",
+  "social_media",
+  "tech",
+])
 
 const infoboxTypeSchema = z.enum([
   "person",
@@ -262,10 +273,14 @@ export const searchRouter = {
         input
 
       try {
+        let searxngCategory: string = category
+        if (category === "tech") searxngCategory = "it"
+        if (category === "social_media") searxngCategory = "social media"
+
         const params = new URLSearchParams({
           q: query,
           format: "json",
-          categories: category,
+          categories: searxngCategory,
           pageno: page.toString(),
         })
 

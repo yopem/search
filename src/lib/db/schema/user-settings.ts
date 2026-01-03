@@ -14,6 +14,19 @@ export const userSettingsTable = pgTable("user_settings", {
   showCalculator: boolean("show_calculator").notNull().default(true),
   showUnitConverter: boolean("show_unit_converter").notNull().default(true),
   showWeather: boolean("show_weather").notNull().default(true),
+  showImagesCategory: boolean("show_images_category").notNull().default(true),
+  showNewsCategory: boolean("show_news_category").notNull().default(true),
+  showVideosCategory: boolean("show_videos_category").notNull().default(true),
+  showMusicCategory: boolean("show_music_category").notNull().default(true),
+  showMapCategory: boolean("show_map_category").notNull().default(false),
+  showScienceCategory: boolean("show_science_category")
+    .notNull()
+    .default(false),
+  showFilesCategory: boolean("show_files_category").notNull().default(false),
+  showSocialMediaCategory: boolean("show_social_media_category")
+    .notNull()
+    .default(false),
+  showTechCategory: boolean("show_tech_category").notNull().default(false),
   defaultLanguage: text("default_language"),
   defaultTimeRange: text("default_time_range"),
   defaultSafeSearch: text("default_safe_search"),

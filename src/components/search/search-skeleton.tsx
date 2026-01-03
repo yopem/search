@@ -4,7 +4,17 @@ import { Card } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 
 interface SearchSkeletonProps {
-  category?: "general" | "images" | "videos" | "news"
+  category?:
+    | "general"
+    | "images"
+    | "videos"
+    | "news"
+    | "music"
+    | "map"
+    | "science"
+    | "files"
+    | "social_media"
+    | "tech"
 }
 
 const SearchSkeleton = ({ category = "general" }: SearchSkeletonProps) => {

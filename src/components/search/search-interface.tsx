@@ -136,7 +136,18 @@ const SearchInterface = ({
 
   const [category, setCategory] = useQueryState(
     "category",
-    parseAsStringLiteral(["general", "images", "videos", "news"] as const)
+    parseAsStringLiteral([
+      "general",
+      "images",
+      "videos",
+      "news",
+      "music",
+      "map",
+      "science",
+      "files",
+      "social_media",
+      "tech",
+    ] as const)
       .withDefault("general")
       .withOptions({
         shallow: false,
@@ -223,6 +234,29 @@ const SearchInterface = ({
 
     hasAppliedDefaultsRef.current = true
   }, [userSettings, setLanguage, setTimeRange, setSafeSearch])
+
+  useEffect(() => {
+    if (!userSettings || !session || category === "general") {
+      return
+    }
+
+    const categoryEnabledMap: Record<string, boolean | undefined> = {
+      images: userSettings.showImagesCategory,
+      news: userSettings.showNewsCategory,
+      videos: userSettings.showVideosCategory,
+      music: userSettings.showMusicCategory,
+      map: userSettings.showMapCategory,
+      science: userSettings.showScienceCategory,
+      files: userSettings.showFilesCategory,
+      social_media: userSettings.showSocialMediaCategory,
+      tech: userSettings.showTechCategory,
+    }
+
+    const isEnabled = categoryEnabledMap[category]
+    if (isEnabled === false) {
+      void setCategory("general")
+    }
+  }, [userSettings, session, category, setCategory])
 
   const { data: carouselImages, isLoading: isLoadingImages } = useQuery({
     ...queryApi.search.getImages.queryOptions({
@@ -864,6 +898,41 @@ const SearchInterface = ({
                                   aria-setsize={allResults.length}
                                 >
                                   <NewsResultCard
+                                    result={result}
+                                    openInNewTab={openInNewTab}
+                                  />
+                                </article>
+                              )
+                            },
+                          )}
+                        </div>
+                      ))}
+
+                    {(category === "music" ||
+                      category === "map" ||
+                      category === "science" ||
+                      category === "files" ||
+                      category === "social_media" ||
+                      category === "tech") &&
+                      data?.pages.map((pageData, pageIndex) => (
+                        <div
+                          key={pageIndex}
+                          data-page={pageIndex + 1}
+                          className="mb-4 space-y-4 last:mb-0"
+                        >
+                          {pageData.results.map(
+                            (result: SearchResult, resultIndex: number) => {
+                              const globalIndex =
+                                pageIndex *
+                                  (data.pages[0]?.results.length || 10) +
+                                resultIndex
+                              return (
+                                <article
+                                  key={globalIndex}
+                                  aria-posinset={globalIndex + 1}
+                                  aria-setsize={allResults.length}
+                                >
+                                  <WebResultCard
                                     result={result}
                                     openInNewTab={openInNewTab}
                                   />
