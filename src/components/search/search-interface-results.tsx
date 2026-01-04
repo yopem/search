@@ -191,7 +191,7 @@ const SearchInterfaceResults = ({
   }, [category, setIsInfiniteScrollEnabled])
 
   useEffect(() => {
-    if (!data?.pages || isInfiniteScrollEnabled) {
+    if (!data?.pages) {
       return
     }
 
@@ -236,10 +236,10 @@ const SearchInterfaceResults = ({
       pageObserversRef.current.forEach((observer) => observer.disconnect())
       pageObserversRef.current = []
     }
-  }, [data?.pages, setPage, page, isInfiniteScrollEnabled])
+  }, [data?.pages, setPage, page])
 
   useEffect(() => {
-    if (!page || !data?.pages || isInfiniteScrollEnabled) {
+    if (!page || !data?.pages) {
       return
     }
 
@@ -261,6 +261,10 @@ const SearchInterfaceResults = ({
 
     if (pageNumber > currentPagesLoaded && hasNextPage && !isFetchingNextPage) {
       void fetchNextPage()
+      return
+    }
+
+    if (isInfiniteScrollEnabled) {
       return
     }
 
