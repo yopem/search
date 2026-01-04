@@ -195,11 +195,25 @@ const parseInfobox = (
       }
     }
 
+    let summary = infobox.content
+
+    if (!summary && infobox.attributes && infobox.attributes.length > 0) {
+      const summaryParts: string[] = []
+      for (const attr of infobox.attributes.slice(0, 3)) {
+        if (typeof attr.value === "string" || typeof attr.value === "number") {
+          summaryParts.push(`${attr.label}: ${attr.value}`)
+        }
+      }
+      if (summaryParts.length > 0) {
+        summary = summaryParts.join("\n")
+      }
+    }
+
     const parsedInfobox: InfoboxData = {
       type: entityType,
       title: infobox.infobox,
       image: infobox.img_src,
-      summary: infobox.content,
+      summary,
       attributes,
       source: infobox.engine ?? "Wikipedia",
       sourceUrl,
