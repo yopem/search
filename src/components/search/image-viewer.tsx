@@ -100,11 +100,13 @@ const ImageViewer = ({
 
       if (e.key === "ArrowLeft" || e.key === "h") {
         e.preventDefault()
+        e.stopPropagation()
         if (currentIndex > 0) {
           onPrevious()
         }
       } else if (e.key === "ArrowRight" || e.key === "l") {
         e.preventDefault()
+        e.stopPropagation()
         if (currentIndex < totalImages - 1) {
           onNext()
         }
