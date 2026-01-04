@@ -1,9 +1,9 @@
 "use client"
 
 import { useState } from "react"
-import Image from "next/image"
-import { ExternalLinkIcon } from "lucide-react"
 
+import InfoboxImage from "@/components/search/infobox-image"
+import InfoboxSource from "@/components/search/infobox-source"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
@@ -22,7 +22,6 @@ const InfoboxPanelWiki = ({
   source,
   sourceUrl,
 }: InfoboxPanelWikiProps) => {
-  const [imageError, setImageError] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
 
   const truncatedSummary =
@@ -36,17 +35,7 @@ const InfoboxPanelWiki = ({
         <CardTitle className="text-lg">{title}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
-        {image && !imageError && (
-          <div className="bg-muted relative aspect-video w-full overflow-hidden rounded-md">
-            <Image
-              src={image}
-              alt={title}
-              fill
-              className="object-cover"
-              onError={() => setImageError(true)}
-            />
-          </div>
-        )}
+        {image && <InfoboxImage src={image} alt={title} aspectRatio="video" />}
         {truncatedSummary && (
           <div className="text-muted-foreground space-y-2 text-sm">
             <p>{truncatedSummary}</p>
@@ -62,15 +51,7 @@ const InfoboxPanelWiki = ({
             )}
           </div>
         )}
-        <a
-          href={sourceUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-xs transition-colors"
-        >
-          <span>{source}</span>
-          <ExternalLinkIcon className="h-3 w-3" />
-        </a>
+        <InfoboxSource source={source} sourceUrl={sourceUrl} />
       </CardContent>
     </Card>
   )

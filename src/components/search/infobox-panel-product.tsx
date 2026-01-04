@@ -1,9 +1,10 @@
 "use client"
 
 import { useState } from "react"
-import Image from "next/image"
-import { ExternalLinkIcon } from "lucide-react"
 
+import InfoboxAttributeList from "@/components/search/infobox-attribute-list"
+import InfoboxImage from "@/components/search/infobox-image"
+import InfoboxSource from "@/components/search/infobox-source"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
@@ -24,7 +25,6 @@ const InfoboxPanelProduct = ({
   source,
   sourceUrl,
 }: InfoboxPanelProductProps) => {
-  const [imageError, setImageError] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
 
   const truncatedSummary =
@@ -47,16 +47,13 @@ const InfoboxPanelProduct = ({
         <CardTitle className="text-lg">{title}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
-        {image && !imageError && (
-          <div className="bg-muted relative mx-auto aspect-square w-full max-w-[200px] overflow-hidden rounded-md">
-            <Image
-              src={image}
-              alt={title}
-              fill
-              className="object-contain"
-              onError={() => setImageError(true)}
-            />
-          </div>
+        {image && (
+          <InfoboxImage
+            src={image}
+            alt={title}
+            aspectRatio="square"
+            objectFit="contain"
+          />
         )}
         {truncatedSummary && (
           <div className="text-muted-foreground space-y-2 text-sm">
@@ -73,31 +70,11 @@ const InfoboxPanelProduct = ({
             )}
           </div>
         )}
-        {Object.keys(attributes).length > 0 && (
-          <div className="space-y-1.5 text-sm">
-            {relevantAttributes
-              .filter((key) => attributes[key])
-              .map((key) => (
-                <div key={key} className="flex gap-2">
-                  <span className="text-muted-foreground min-w-[100px] font-medium">
-                    {key}:
-                  </span>
-                  <span className="text-foreground">
-                    {String(attributes[key])}
-                  </span>
-                </div>
-              ))}
-          </div>
-        )}
-        <a
-          href={sourceUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-xs transition-colors"
-        >
-          <span>{source}</span>
-          <ExternalLinkIcon className="h-3 w-3" />
-        </a>
+        <InfoboxAttributeList
+          attributes={attributes}
+          relevantKeys={relevantAttributes}
+        />
+        <InfoboxSource source={source} sourceUrl={sourceUrl} />
       </CardContent>
     </Card>
   )

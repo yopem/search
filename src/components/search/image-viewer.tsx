@@ -1,18 +1,13 @@
 "use client"
 
 import { useCallback, useEffect, useState } from "react"
-import {
-  ChevronLeft as ChevronLeftIcon,
-  ChevronRight as ChevronRightIcon,
-  ExternalLink as ExternalLinkIcon,
-  X as XIcon,
-} from "lucide-react"
 
+import ImageViewerControls from "@/components/search/image-viewer-controls"
+import ImageViewerMetadata from "@/components/search/image-viewer-metadata"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogBackdrop,
-  DialogClose,
   DialogPortal,
   DialogViewport,
 } from "@/components/ui/dialog"
@@ -83,15 +78,6 @@ const ImageViewer = ({
     return raw.startsWith("//") ? `https:${raw}` : raw
   }, [])
 
-  const extractDomain = (url: string) => {
-    try {
-      const domain = new URL(url).hostname
-      return domain.replace("www.", "")
-    } catch {
-      return ""
-    }
-  }
-
   useEffect(() => {
     setImageLoaded(false)
     setImageError(false)
@@ -138,55 +124,13 @@ const ImageViewer = ({
             className="relative flex h-screen w-screen items-center justify-center"
             onClick={onClose}
           >
-            <DialogClose
-              aria-label="Close"
-              className="absolute top-4 left-4 z-10"
-              onClick={onClose}
-              render={
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="bg-black/50 text-white hover:bg-black/70"
-                />
-              }
-            >
-              <XIcon />
-            </DialogClose>
-
-            <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
-              <div className="rounded-md bg-black/50 px-3 py-1.5 text-sm font-medium text-white">
-                {currentIndex + 1} / {totalImages}
-              </div>
-            </div>
-
-            <Button
-              size="icon"
-              variant="ghost"
-              className={cn(
-                "absolute left-4 z-10 bg-black/50 text-white hover:bg-black/70",
-                currentIndex === 0 && "cursor-not-allowed opacity-50",
-              )}
-              onClick={onPrevious}
-              disabled={currentIndex === 0}
-              aria-label="Previous image"
-            >
-              <ChevronLeftIcon className="h-6 w-6" />
-            </Button>
-
-            <Button
-              size="icon"
-              variant="ghost"
-              className={cn(
-                "absolute right-4 z-10 bg-black/50 text-white hover:bg-black/70",
-                currentIndex === totalImages - 1 &&
-                  "cursor-not-allowed opacity-50",
-              )}
-              onClick={onNext}
-              disabled={currentIndex === totalImages - 1}
-              aria-label="Next image"
-            >
-              <ChevronRightIcon className="h-6 w-6" />
-            </Button>
+            <ImageViewerControls
+              currentIndex={currentIndex}
+              totalImages={totalImages}
+              onNext={onNext}
+              onPrevious={onPrevious}
+              onClose={onClose}
+            />
 
             <div
               className="flex max-h-screen max-w-screen flex-col items-center justify-center p-16"
@@ -229,42 +173,13 @@ const ImageViewer = ({
                   />
 
                   {imageLoaded && (
-                    <div className="flex max-w-2xl flex-col items-center gap-2 rounded-lg bg-black/50 px-4 py-3">
-                      <p className="line-clamp-2 text-center font-medium text-white">
-                        {image.title}
-                      </p>
-                      <div className="flex flex-col items-center gap-2">
-                        {(image.resolution ?? image.img_format) && (
-                          <div className="flex items-center gap-2 text-sm text-white/90">
-                            {image.resolution && (
-                              <span>{image.resolution}</span>
-                            )}
-                            {image.resolution && image.img_format && (
-                              <span className="text-white/50">•</span>
-                            )}
-                            {image.img_format && (
-                              <span>{image.img_format}</span>
-                            )}
-                          </div>
-                        )}
-                        <div className="flex items-center gap-3">
-                          {extractDomain(image.url) && (
-                            <p className="text-sm text-white/70">
-                              {extractDomain(image.url)}
-                            </p>
-                          )}
-                          <a
-                            href={image.url}
-                            target={openInNewTab ? "_blank" : undefined}
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 text-sm text-white transition-colors hover:text-white/80"
-                          >
-                            <ExternalLinkIcon className="h-4 w-4" />
-                            View Source
-                          </a>
-                        </div>
-                      </div>
-                    </div>
+                    <ImageViewerMetadata
+                      title={image.title}
+                      url={image.url}
+                      resolution={image.resolution}
+                      imgFormat={image.img_format}
+                      openInNewTab={openInNewTab}
+                    />
                   )}
                 </div>
               )}
