@@ -27,7 +27,6 @@ import {
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { toastManager } from "@/components/ui/toast"
 import { queryApi } from "@/lib/orpc/query"
 import { DEFAULT_BANGS } from "@/lib/utils/bangs"
@@ -38,6 +37,17 @@ interface BangFormData {
   url: string
   label: string
   isEnabled?: boolean
+  isSystemOverride?: boolean
+}
+
+interface MergedBang {
+  id?: string
+  shortcut: string
+  url: string
+  label: string
+  isEnabled: boolean
+  isSystemOverride: boolean
+  isDefault: boolean
 }
 
 const BangManager = () => {
@@ -48,8 +58,12 @@ const BangManager = () => {
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false)
-  const [selectedBang, setSelectedBang] = useState<BangFormData | null>(null)
-  const [bangToDelete, setBangToDelete] = useState<string | null>(null)
+  const [selectedBang, setSelectedBang] = useState<MergedBang | null>(null)
+  const [bangToDelete, setBangToDelete] = useState<{
+    id?: string
+    shortcut: string
+    isDefault: boolean
+  } | null>(null)
   const [formData, setFormData] = useState<BangFormData>({
     shortcut: "",
     url: "",
@@ -58,7 +72,7 @@ const BangManager = () => {
   const [importFile, setImportFile] = useState<File | null>(null)
   const [importMode, setImportMode] = useState<"skip" | "replace">("skip")
 
-  const { data: customBangs = [], isLoading: isLoadingCustom } = useQuery({
+  const { data: customBangs = [], isLoading } = useQuery({
     ...queryApi.bangs.list.queryOptions({ input: {} }),
   })
 
@@ -82,6 +96,13 @@ const BangManager = () => {
       setIsAddDialogOpen(false)
       setFormData({ shortcut: "", url: "", label: "" })
     },
+    onError: (error) => {
+      toastManager.add({
+        title: "Failed to create bang",
+        description:
+          error.message || "An error occurred while creating the bang",
+      })
+    },
   })
 
   const updateMutation = useMutation({
@@ -95,10 +116,17 @@ const BangManager = () => {
       })
       toastManager.add({
         title: "Bang updated",
-        description: "Custom bang has been updated",
+        description: "Bang has been updated",
       })
       setIsEditDialogOpen(false)
       setSelectedBang(null)
+    },
+    onError: (error) => {
+      toastManager.add({
+        title: "Failed to update bang",
+        description:
+          error.message || "An error occurred while updating the bang",
+      })
     },
   })
 
@@ -113,10 +141,17 @@ const BangManager = () => {
       })
       toastManager.add({
         title: "Bang deleted",
-        description: "Custom bang has been deleted",
+        description: "Bang has been deleted",
       })
       setIsDeleteDialogOpen(false)
       setBangToDelete(null)
+    },
+    onError: (error) => {
+      toastManager.add({
+        title: "Failed to delete bang",
+        description:
+          error.message || "An error occurred while deleting the bang",
+      })
     },
   })
 
@@ -211,36 +246,94 @@ const BangManager = () => {
     },
   })
 
-  const filteredCustomBangs = useMemo(() => {
-    if (!searchQuery) return customBangs
-
-    const query = searchQuery.toLowerCase()
-    return customBangs.filter(
-      (bang) =>
-        bang.shortcut.toLowerCase().includes(query) ||
-        bang.label.toLowerCase().includes(query) ||
-        bang.url.toLowerCase().includes(query),
-    )
-  }, [customBangs, searchQuery])
-
-  const filteredDefaultBangs = useMemo(() => {
-    if (!searchQuery) return DEFAULT_BANGS
-
-    const query = searchQuery.toLowerCase()
-    return DEFAULT_BANGS.filter(
-      (bang) =>
-        bang.shortcut.toLowerCase().includes(query) ||
-        bang.label.toLowerCase().includes(query) ||
-        bang.url.toLowerCase().includes(query),
-    )
-  }, [searchQuery])
-
   const disabledDefaultBangs = useMemo(
     () => userSettings?.disabledDefaultBangs ?? [],
     [userSettings],
   )
 
+  const mergedBangs = useMemo(() => {
+    const bangsMap = new Map<string, MergedBang>()
+
+    customBangs.forEach((bang) => {
+      bangsMap.set(bang.shortcut.toLowerCase(), {
+        id: bang.id,
+        shortcut: bang.shortcut,
+        url: bang.url,
+        label: bang.label,
+        isEnabled: bang.isEnabled,
+        isSystemOverride: bang.isSystemOverride,
+        isDefault: false,
+      })
+    })
+
+    DEFAULT_BANGS.forEach((bang) => {
+      const shortcut = bang.shortcut.toLowerCase()
+      if (!bangsMap.has(shortcut)) {
+        bangsMap.set(shortcut, {
+          shortcut: bang.shortcut,
+          url: bang.url,
+          label: bang.label,
+          isEnabled: !disabledDefaultBangs.includes(bang.shortcut),
+          isSystemOverride: false,
+          isDefault: true,
+        })
+      }
+    })
+
+    return Array.from(bangsMap.values()).sort((a, b) => {
+      if (a.isDefault !== b.isDefault) {
+        return a.isDefault ? 1 : -1
+      }
+      return a.shortcut.localeCompare(b.shortcut)
+    })
+  }, [customBangs, disabledDefaultBangs])
+
+  const filteredBangs = useMemo(() => {
+    if (!searchQuery) return mergedBangs
+
+    const query = searchQuery.toLowerCase()
+    return mergedBangs.filter(
+      (bang) =>
+        bang.shortcut.toLowerCase().includes(query) ||
+        bang.label.toLowerCase().includes(query) ||
+        bang.url.toLowerCase().includes(query),
+    )
+  }, [mergedBangs, searchQuery])
+
+  const customBangsCount = mergedBangs.filter((b) => !b.isDefault).length
+
   const handleCreate = () => {
+    const normalizedShortcut = formData.shortcut.toLowerCase().trim()
+    const defaultBangExists = DEFAULT_BANGS.some(
+      (b) => b.shortcut.toLowerCase() === normalizedShortcut,
+    )
+
+    if (defaultBangExists) {
+      setIsAddDialogOpen(false)
+      setTimeout(() => {
+        toastManager.add({
+          title: "Default bang exists",
+          description: `A default bang with shortcut "${normalizedShortcut}" already exists. Edit the default bang to create an override instead.`,
+        })
+      }, 100)
+      return
+    }
+
+    const customBangExists = customBangs.some(
+      (b) => b.shortcut.toLowerCase() === normalizedShortcut,
+    )
+
+    if (customBangExists) {
+      setIsAddDialogOpen(false)
+      setTimeout(() => {
+        toastManager.add({
+          title: "Bang already exists",
+          description: `A custom bang with shortcut "${normalizedShortcut}" already exists.`,
+        })
+      }, 100)
+      return
+    }
+
     createMutation.mutate({
       shortcut: formData.shortcut.trim(),
       url: formData.url.trim(),
@@ -250,24 +343,50 @@ const BangManager = () => {
   }
 
   const handleUpdate = () => {
-    if (!selectedBang?.id) return
+    if (!selectedBang) return
 
-    updateMutation.mutate({
-      id: selectedBang.id,
-      shortcut: selectedBang.shortcut.trim(),
-      url: selectedBang.url.trim(),
-      label: selectedBang.label.trim(),
-      isEnabled: selectedBang.isEnabled,
-    })
+    if (selectedBang.isDefault && !selectedBang.id) {
+      createMutation.mutate({
+        shortcut: selectedBang.shortcut.trim(),
+        url: selectedBang.url.trim(),
+        label: selectedBang.label.trim(),
+        isSystemOverride: true,
+      })
+      setIsEditDialogOpen(false)
+      setSelectedBang(null)
+    } else if (selectedBang.id) {
+      updateMutation.mutate({
+        id: selectedBang.id,
+        shortcut: selectedBang.shortcut.trim(),
+        url: selectedBang.url.trim(),
+        label: selectedBang.label.trim(),
+        isEnabled: selectedBang.isEnabled,
+      })
+    }
   }
 
   const handleDelete = () => {
     if (!bangToDelete) return
-    deleteMutation.mutate({ id: bangToDelete })
+
+    if (bangToDelete.isDefault) {
+      disableDefaultMutation.mutate({ shortcut: bangToDelete.shortcut })
+      setIsDeleteDialogOpen(false)
+      setBangToDelete(null)
+    } else if (bangToDelete.id) {
+      deleteMutation.mutate({ id: bangToDelete.id })
+    }
   }
 
-  const handleToggle = (id: string, isEnabled: boolean) => {
-    toggleMutation.mutate({ id, isEnabled: !isEnabled })
+  const handleToggle = (bang: MergedBang) => {
+    if (bang.isDefault && !bang.id) {
+      if (bang.isEnabled) {
+        disableDefaultMutation.mutate({ shortcut: bang.shortcut })
+      } else {
+        enableDefaultMutation.mutate({ shortcut: bang.shortcut })
+      }
+    } else if (bang.id) {
+      toggleMutation.mutate({ id: bang.id, isEnabled: !bang.isEnabled })
+    }
   }
 
   const handleExport = () => {
@@ -291,14 +410,6 @@ const BangManager = () => {
 
   const handleReset = () => {
     resetMutation.mutate({})
-  }
-
-  const handleToggleDefault = (shortcut: string, isDisabled: boolean) => {
-    if (isDisabled) {
-      enableDefaultMutation.mutate({ shortcut })
-    } else {
-      disableDefaultMutation.mutate({ shortcut })
-    }
   }
 
   return (
@@ -452,171 +563,144 @@ const BangManager = () => {
         </div>
       </div>
 
-      <Tabs defaultValue="custom">
-        <TabsList>
-          <TabsTrigger value="custom">
-            Custom Bangs ({filteredCustomBangs.length})
-          </TabsTrigger>
-          <TabsTrigger value="default">
-            Default Bangs ({filteredDefaultBangs.length})
-          </TabsTrigger>
-        </TabsList>
+      {isLoading && (
+        <Card>
+          <CardContent className="py-8 text-center">
+            <p className="text-muted-foreground">Loading...</p>
+          </CardContent>
+        </Card>
+      )}
 
-        <TabsContent value="custom" className="space-y-4">
-          {isLoadingCustom && (
-            <Card>
-              <CardContent className="py-8 text-center">
-                <p className="text-muted-foreground">Loading...</p>
-              </CardContent>
-            </Card>
-          )}
+      {!isLoading && filteredBangs.length === 0 && (
+        <Card>
+          <CardContent className="py-8 text-center">
+            <p className="text-muted-foreground">
+              {searchQuery
+                ? "No bangs match your search"
+                : "No bangs available"}
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
-          {!isLoadingCustom && filteredCustomBangs.length === 0 && (
-            <Card>
-              <CardContent className="py-8 text-center">
-                <p className="text-muted-foreground">
-                  {searchQuery
-                    ? "No bangs match your search"
-                    : "No custom bangs yet. Create one to get started!"}
-                </p>
-              </CardContent>
-            </Card>
-          )}
-
-          {!isLoadingCustom &&
-            filteredCustomBangs.map((bang) => (
-              <Card key={bang.id}>
-                <CardContent className="flex items-center justify-between gap-4 p-4">
-                  <div className="flex-1 space-y-1">
-                    <div className="flex items-center gap-2">
-                      <code className="bg-muted rounded px-2 py-1 font-mono text-sm">
-                        !{bang.shortcut}
-                      </code>
-                      <span className="font-medium">{bang.label}</span>
-                      {!bang.isEnabled && (
-                        <Badge variant="outline">Disabled</Badge>
-                      )}
-                      {bang.isSystemOverride && (
-                        <Badge variant="outline">Override</Badge>
-                      )}
-                    </div>
-                    <p className="text-muted-foreground truncate text-sm">
-                      {bang.url}
-                    </p>
-                  </div>
+      <div className="space-y-4">
+        {!isLoading &&
+          filteredBangs.map((bang) => (
+            <Card key={`${bang.shortcut}-${bang.id ?? "default"}`}>
+              <CardContent className="flex items-center justify-between gap-4 p-4">
+                <div className="flex-1 space-y-1">
                   <div className="flex items-center gap-2">
-                    <Switch
-                      checked={bang.isEnabled}
-                      onCheckedChange={() =>
-                        handleToggle(bang.id, bang.isEnabled)
-                      }
-                    />
+                    <code className="bg-muted rounded px-2 py-1 font-mono text-sm">
+                      !{bang.shortcut}
+                    </code>
+                    <span className="font-medium">{bang.label}</span>
+                    {!bang.isEnabled && (
+                      <Badge variant="outline">Disabled</Badge>
+                    )}
+                    {bang.isSystemOverride && (
+                      <Badge variant="outline">Custom</Badge>
+                    )}
+                    {bang.isDefault && !bang.isSystemOverride && (
+                      <Badge variant="outline">Default</Badge>
+                    )}
+                  </div>
+                  <p className="text-muted-foreground truncate text-sm">
+                    {bang.url}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch
+                    checked={bang.isEnabled}
+                    onCheckedChange={() => handleToggle(bang)}
+                  />
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => {
+                      setSelectedBang(bang)
+                      setIsEditDialogOpen(true)
+                    }}
+                  >
+                    <PencilIcon className="h-4 w-4" />
+                  </Button>
+                  {!bang.isDefault && (
                     <Button
                       variant="outline"
                       size="icon"
                       onClick={() => {
-                        setSelectedBang(bang)
-                        setIsEditDialogOpen(true)
-                      }}
-                    >
-                      <PencilIcon className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => {
-                        setBangToDelete(bang.id)
+                        setBangToDelete({
+                          id: bang.id,
+                          shortcut: bang.shortcut,
+                          isDefault: bang.isDefault,
+                        })
                         setIsDeleteDialogOpen(true)
                       }}
                     >
                       <TrashIcon className="h-4 w-4" />
                     </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+      </div>
 
-          {filteredCustomBangs.length > 0 && (
-            <div className="flex items-center justify-between">
-              <p className="text-muted-foreground text-sm">
-                {filteredCustomBangs.length} / 100 custom bangs
+      {customBangsCount > 0 && (
+        <div className="flex items-center justify-between">
+          <p className="text-muted-foreground text-sm">
+            {customBangsCount} / 100 custom bangs
+          </p>
+          <Dialog open={isResetDialogOpen} onOpenChange={setIsResetDialogOpen}>
+            <DialogTrigger
+              render={
+                <Button variant="outline">
+                  <RefreshCwIcon className="mr-2 h-4 w-4" />
+                  Reset All Custom
+                </Button>
+              }
+            />
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Reset All Custom Bangs</DialogTitle>
+              </DialogHeader>
+              <p className="px-6 pb-4">
+                This will delete all your custom bangs. This action cannot be
+                undone.
               </p>
-              <Dialog
-                open={isResetDialogOpen}
-                onOpenChange={setIsResetDialogOpen}
-              >
-                <DialogTrigger
-                  render={
-                    <Button variant="outline">
-                      <RefreshCwIcon className="mr-2 h-4 w-4" />
-                      Reset All
-                    </Button>
-                  }
+              <DialogFooter>
+                <DialogClose
+                  render={<Button variant="outline">Cancel</Button>}
                 />
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Reset All Custom Bangs</DialogTitle>
-                  </DialogHeader>
-                  <p className="px-6 pb-4">
-                    This will delete all your custom bangs. This action cannot
-                    be undone.
-                  </p>
-                  <DialogFooter>
-                    <DialogClose
-                      render={<Button variant="outline">Cancel</Button>}
-                    />
-                    <Button
-                      variant="destructive"
-                      onClick={handleReset}
-                      disabled={resetMutation.isPending}
-                    >
-                      Reset All
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
-            </div>
-          )}
-        </TabsContent>
-
-        <TabsContent value="default" className="space-y-4">
-          {filteredDefaultBangs.map((bang) => {
-            const isDisabled = disabledDefaultBangs.includes(bang.shortcut)
-            return (
-              <Card key={bang.shortcut}>
-                <CardContent className="flex items-center justify-between gap-4 p-4">
-                  <div className="flex-1 space-y-1">
-                    <div className="flex items-center gap-2">
-                      <code className="bg-muted rounded px-2 py-1 font-mono text-sm">
-                        !{bang.shortcut}
-                      </code>
-                      <span className="font-medium">{bang.label}</span>
-                      {isDisabled && <Badge variant="outline">Disabled</Badge>}
-                    </div>
-                    <p className="text-muted-foreground truncate text-sm">
-                      {bang.url}
-                    </p>
-                  </div>
-                  <Switch
-                    checked={!isDisabled}
-                    onCheckedChange={() =>
-                      handleToggleDefault(bang.shortcut, isDisabled)
-                    }
-                  />
-                </CardContent>
-              </Card>
-            )
-          })}
-        </TabsContent>
-      </Tabs>
+                <Button
+                  variant="destructive"
+                  onClick={handleReset}
+                  disabled={resetMutation.isPending}
+                >
+                  Reset All
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
+      )}
 
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit Bang</DialogTitle>
+            <DialogTitle>
+              {selectedBang && selectedBang.isDefault && !selectedBang.id
+                ? "Customize Default Bang"
+                : "Edit Bang"}
+            </DialogTitle>
           </DialogHeader>
           {selectedBang && (
             <div className="space-y-4 px-6 pb-4">
+              {selectedBang.isDefault && !selectedBang.id && (
+                <p className="text-muted-foreground text-sm">
+                  Editing a default bang will create a custom override that
+                  takes precedence over the default.
+                </p>
+              )}
               <Field>
                 <FieldLabel>Shortcut</FieldLabel>
                 <Input
@@ -627,6 +711,7 @@ const BangManager = () => {
                       shortcut: e.target.value,
                     })
                   }
+                  disabled={selectedBang.isDefault && !selectedBang.id}
                 />
               </Field>
               <Field>
@@ -651,8 +736,13 @@ const BangManager = () => {
           )}
           <DialogFooter>
             <DialogClose render={<Button variant="outline">Cancel</Button>} />
-            <Button onClick={handleUpdate} disabled={updateMutation.isPending}>
-              Update
+            <Button
+              onClick={handleUpdate}
+              disabled={updateMutation.isPending || createMutation.isPending}
+            >
+              {selectedBang && selectedBang.isDefault && !selectedBang.id
+                ? "Create Override"
+                : "Update"}
             </Button>
           </DialogFooter>
         </DialogContent>
