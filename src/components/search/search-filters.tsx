@@ -4,6 +4,7 @@ import { useMemo, useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { FilterIcon as FilterXIcon } from "lucide-react"
 
+import SearchFilterMenu from "@/components/search/search-filter-menu"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -112,25 +113,12 @@ const SearchFilters = ({
 
   return (
     <div className="flex flex-wrap items-center gap-2 py-3">
-      <Menu>
-        <MenuTrigger
-          render={
-            <Button variant="outline" size="sm">
-              {TIME_RANGES.find((t) => t.value === timeRange)?.label ??
-                "Any time"}
-            </Button>
-          }
-        />
-        <MenuPopup>
-          <MenuRadioGroup value={timeRange} onValueChange={onTimeRangeChange}>
-            {TIME_RANGES.map((option) => (
-              <MenuRadioItem key={option.value} value={option.value}>
-                {option.label}
-              </MenuRadioItem>
-            ))}
-          </MenuRadioGroup>
-        </MenuPopup>
-      </Menu>
+      <SearchFilterMenu
+        label="Any time"
+        value={timeRange}
+        options={TIME_RANGES}
+        onValueChange={onTimeRangeChange}
+      />
 
       <Menu>
         <MenuTrigger
@@ -171,26 +159,12 @@ const SearchFilters = ({
         </MenuPopup>
       </Menu>
 
-      <Menu>
-        <MenuTrigger
-          render={
-            <Button variant="outline" size="sm">
-              Safe:{" "}
-              {SAFE_SEARCH_OPTIONS.find((s) => s.value === safeSearch)?.label ??
-                "Moderate"}
-            </Button>
-          }
-        />
-        <MenuPopup>
-          <MenuRadioGroup value={safeSearch} onValueChange={onSafeSearchChange}>
-            {SAFE_SEARCH_OPTIONS.map((option) => (
-              <MenuRadioItem key={option.value} value={option.value}>
-                {option.label}
-              </MenuRadioItem>
-            ))}
-          </MenuRadioGroup>
-        </MenuPopup>
-      </Menu>
+      <SearchFilterMenu
+        label="Safe: Moderate"
+        value={safeSearch}
+        options={SAFE_SEARCH_OPTIONS}
+        onValueChange={onSafeSearchChange}
+      />
 
       {hasActiveFilters && (
         <Button

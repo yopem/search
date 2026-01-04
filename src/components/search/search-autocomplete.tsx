@@ -2,11 +2,9 @@
 
 import { useEffect, useMemo, useRef, useState } from "react"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { SearchIcon } from "lucide-react"
 
-import { Input } from "@/components/ui/input"
-import { Kbd, KbdGroup } from "@/components/ui/kbd"
-import { ScrollArea } from "@/components/ui/scroll-area"
+import SearchAutocompleteInput from "@/components/search/search-autocomplete-input"
+import SearchAutocompleteSuggestions from "@/components/search/search-autocomplete-suggestions"
 import { queryApi } from "@/lib/orpc/query"
 
 interface SearchAutocompleteProps {
@@ -49,11 +47,6 @@ const SearchAutocomplete = ({
   const [isFocused, setIsFocused] = useState(false)
   const queryClient = useQueryClient()
   const suggestionRefs = useRef<(HTMLButtonElement | null)[]>([])
-  const [isMac, setIsMac] = useState(false)
-
-  useEffect(() => {
-    setIsMac(/(Mac|iPhone|iPod|iPad)/i.test(navigator.userAgent))
-  }, [])
 
   const debouncedValue = useDebounce(value, 300)
 
@@ -73,7 +66,6 @@ const SearchAutocomplete = ({
     return suggestions.filter((s) => s.toLowerCase() !== value.toLowerCase())
   }, [suggestions, value])
 
-  // Close autocomplete when value becomes too short
   useEffect(() => {
     if (value.length <= 1) {
       setIsOpen(false)
@@ -182,62 +174,25 @@ const SearchAutocomplete = ({
 
   return (
     <div className="relative w-full">
-      <div className="relative">
-        <Input
-          type="search"
-          name="q"
-          placeholder={placeholder}
-          value={value}
-          onChange={handleInputChange}
-          onKeyDown={handleKeyDown}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
-          className="pr-10"
-          size="lg"
-          autoComplete="off"
-        />
-        {showKbdHint && !isFocused && (alwaysShowKbd || value.length === 0) && (
-          <div className="pointer-events-none absolute top-1/2 right-14 z-10 hidden -translate-y-1/2 items-center gap-1 md:flex">
-            <KbdGroup>
-              <Kbd>{isMac ? "⌘" : "Ctrl"}</Kbd>
-              <Kbd>K</Kbd>
-            </KbdGroup>
-          </div>
-        )}
-        <button
-          type="submit"
-          className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2 transition-colors"
-          aria-label="Search"
-        >
-          <SearchIcon className="h-4 w-4" />
-        </button>
-      </div>
+      <SearchAutocompleteInput
+        value={value}
+        onChange={handleInputChange}
+        onKeyDown={handleKeyDown}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
+        placeholder={placeholder}
+        showKbdHint={showKbdHint}
+        alwaysShowKbd={alwaysShowKbd}
+        isFocused={isFocused}
+      />
 
       {showSuggestions && (
-        <div className="bg-popover absolute top-full right-0 left-0 z-50 mt-1 rounded-md border shadow-md">
-          <ScrollArea className="h-[20vh]">
-            <div className="p-1">
-              {filteredSuggestions.map((suggestion, index) => (
-                <button
-                  key={index}
-                  type="button"
-                  ref={(el) => {
-                    suggestionRefs.current[index] = el
-                  }}
-                  onClick={() => handleSelect(suggestion)}
-                  className={`flex w-full items-center gap-2 rounded-sm px-3 py-2 text-left text-sm ${
-                    index === highlightedIndex
-                      ? "bg-accent text-accent-foreground"
-                      : "hover:bg-accent hover:text-accent-foreground"
-                  }`}
-                >
-                  <SearchIcon className="text-muted-foreground h-4 w-4" />
-                  <span>{suggestion}</span>
-                </button>
-              ))}
-            </div>
-          </ScrollArea>
-        </div>
+        <SearchAutocompleteSuggestions
+          suggestions={filteredSuggestions}
+          highlightedIndex={highlightedIndex}
+          onSelect={handleSelect}
+          suggestionRefs={suggestionRefs}
+        />
       )}
     </div>
   )
