@@ -312,11 +312,6 @@ const SearchInterfaceResults = ({
     setIsInfiniteScrollEnabled(true)
   }
 
-  const totalImages =
-    category === "general" && carouselImages
-      ? carouselImages.length
-      : allResults.length
-
   return (
     <>
       <SearchHeader
@@ -491,7 +486,7 @@ const SearchInterfaceResults = ({
                 ? carouselImages[selectedImageIndex - 1]
                 : undefined
             }
-            onNext={() => handleNext(totalImages)}
+            onNext={() => handleNext(carouselImages.length)}
             onPrevious={handlePrevious}
             openInNewTab={openInNewTab}
           />
@@ -514,7 +509,7 @@ const SearchInterfaceResults = ({
               ? allResults[selectedImageIndex - 1]
               : undefined
           }
-          onNext={() => handleNext(totalImages)}
+          onNext={() => handleNext(allResults.length)}
           onPrevious={handlePrevious}
           openInNewTab={openInNewTab}
         />

@@ -55,7 +55,10 @@ const ImageViewerControls = ({
           "absolute left-4 z-10 bg-black/50 text-white hover:bg-black/70",
           currentIndex === 0 && "cursor-not-allowed opacity-50",
         )}
-        onClick={onPrevious}
+        onClick={(e) => {
+          e.stopPropagation()
+          onPrevious()
+        }}
         disabled={currentIndex === 0}
         aria-label="Previous image"
       >
@@ -69,7 +72,10 @@ const ImageViewerControls = ({
           "absolute right-4 z-10 bg-black/50 text-white hover:bg-black/70",
           currentIndex === totalImages - 1 && "cursor-not-allowed opacity-50",
         )}
-        onClick={onNext}
+        onClick={(e) => {
+          e.stopPropagation()
+          onNext()
+        }}
         disabled={currentIndex === totalImages - 1}
         aria-label="Next image"
       >
