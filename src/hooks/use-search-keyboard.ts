@@ -84,10 +84,28 @@ export const useSearchKeyboard = ({
           void setCategory("images")
         } else if (e.key === "3") {
           e.preventDefault()
-          void setCategory("videos")
+          void setCategory("news")
         } else if (e.key === "4") {
           e.preventDefault()
-          void setCategory("news")
+          void setCategory("videos")
+        } else if (e.key === "5") {
+          e.preventDefault()
+          void setCategory("music")
+        } else if (e.key === "6") {
+          e.preventDefault()
+          void setCategory("map")
+        } else if (e.key === "7") {
+          e.preventDefault()
+          void setCategory("science")
+        } else if (e.key === "8") {
+          e.preventDefault()
+          void setCategory("tech")
+        } else if (e.key === "9") {
+          e.preventDefault()
+          void setCategory("files")
+        } else if (e.key === "0") {
+          e.preventDefault()
+          void setCategory("social_media")
         }
       }
     }
