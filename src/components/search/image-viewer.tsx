@@ -98,12 +98,12 @@ const ImageViewer = ({
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isOpen) return
 
-      if (e.key === "ArrowLeft") {
+      if (e.key === "ArrowLeft" || e.key === "h") {
         e.preventDefault()
         if (currentIndex > 0) {
           onPrevious()
         }
-      } else if (e.key === "ArrowRight") {
+      } else if (e.key === "ArrowRight" || e.key === "l") {
         e.preventDefault()
         if (currentIndex < totalImages - 1) {
           onNext()
