@@ -30,6 +30,10 @@ export const userSettingsTable = pgTable("user_settings", {
   defaultLanguage: text("default_language"),
   defaultTimeRange: text("default_time_range"),
   defaultSafeSearch: text("default_safe_search"),
+  disabledDefaultBangs: text("disabled_default_bangs")
+    .array()
+    .notNull()
+    .default([]),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at")
     .defaultNow()

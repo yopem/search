@@ -34,6 +34,7 @@ import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
 import { useMediaQuery } from "@/hooks/use-media-query"
 import { queryApi } from "@/lib/orpc/query"
+import { buildBangUrl, DEFAULT_BANGS, findBang } from "@/lib/utils/bangs"
 import { detectLanguage } from "@/lib/utils/language-detection"
 
 interface SearchResult {
@@ -62,23 +63,6 @@ interface SearchInterfaceProps {
   } | null
   openInNewTab?: boolean
   hasWeatherApi?: boolean
-}
-
-const BANG_MAPPINGS: Record<string, string> = {
-  g: "https://www.google.com/search?q=",
-  gh: "https://github.com/search?q=",
-  so: "https://stackoverflow.com/search?q=",
-  w: "https://en.wikipedia.org/wiki/Special:Search?search=",
-  yt: "https://www.youtube.com/results?search_query=",
-  a: "https://www.amazon.com/s?k=",
-  r: "https://www.reddit.com/search?q=",
-  tw: "https://twitter.com/search?q=",
-  mdn: "https://developer.mozilla.org/en-US/search?q=",
-  npm: "https://www.npmjs.com/search?q=",
-  py: "https://docs.python.org/3/search.html?q=",
-  wiki: "https://en.wikipedia.org/wiki/Special:Search?search=",
-  imdb: "https://www.imdb.com/find?q=",
-  maps: "https://www.google.com/maps/search/",
 }
 
 const SearchInterface = ({
@@ -203,6 +187,13 @@ const SearchInterface = ({
 
   const { data: userSettings } = useQuery({
     ...queryApi.userSettings.get.queryOptions({
+      input: {},
+    }),
+    enabled: !!session,
+  })
+
+  const { data: resolvedBangs } = useQuery({
+    ...queryApi.bangs.getResolved.queryOptions({
       input: {},
     }),
     enabled: !!session,
@@ -444,11 +435,13 @@ const SearchInterface = ({
     const bangMatch = bangRegex.exec(trimmedQuery)
 
     if (bangMatch) {
-      const [, bang, query] = bangMatch
-      const baseUrl = BANG_MAPPINGS[bang]
+      const [, bangShortcut, query] = bangMatch
 
-      if (baseUrl) {
-        window.location.href = baseUrl + encodeURIComponent(query)
+      const bangsToUse = resolvedBangs ?? DEFAULT_BANGS
+      const bang = findBang(bangsToUse, bangShortcut)
+
+      if (bang) {
+        window.location.href = buildBangUrl(bang.url, query)
         return true
       }
     }

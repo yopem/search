@@ -1,5 +1,6 @@
 import { ORPCError } from "@orpc/server"
 import { eq } from "drizzle-orm"
+import { z } from "zod"
 
 import { protectedProcedure } from "@/lib/api/orpc"
 import { updateUserSettingsSchema, userSettingsTable } from "@/lib/db/schema"
@@ -114,6 +115,94 @@ export const userSettingsRouter = {
         }
         throw new ORPCError("INTERNAL_SERVER_ERROR", {
           message: "Failed to update user settings",
+        })
+      }
+    }),
+
+  disableDefaultBang: protectedProcedure
+    .input(z.object({ shortcut: z.string() }))
+    .handler(async ({ input, context }) => {
+      try {
+        const existing = await context.db
+          .select()
+          .from(userSettingsTable)
+          .where(eq(userSettingsTable.userId, context.session.id))
+          .limit(1)
+
+        if (existing.length === 0) {
+          throw new ORPCError("NOT_FOUND", {
+            message: "User settings not found",
+          })
+        }
+
+        const currentDisabled = existing[0].disabledDefaultBangs
+        const normalizedShortcut = input.shortcut.toLowerCase()
+
+        if (currentDisabled.includes(normalizedShortcut)) {
+          return existing[0]
+        }
+
+        const newDisabled = [...currentDisabled, normalizedShortcut]
+
+        const [updated] = await context.db
+          .update(userSettingsTable)
+          .set({
+            disabledDefaultBangs: newDisabled,
+            updatedAt: new Date(),
+          })
+          .where(eq(userSettingsTable.userId, context.session.id))
+          .returning()
+
+        return updated
+      } catch (error) {
+        if (error instanceof ORPCError) {
+          throw error
+        }
+        throw new ORPCError("INTERNAL_SERVER_ERROR", {
+          message: "Failed to disable default bang",
+        })
+      }
+    }),
+
+  enableDefaultBang: protectedProcedure
+    .input(z.object({ shortcut: z.string() }))
+    .handler(async ({ input, context }) => {
+      try {
+        const existing = await context.db
+          .select()
+          .from(userSettingsTable)
+          .where(eq(userSettingsTable.userId, context.session.id))
+          .limit(1)
+
+        if (existing.length === 0) {
+          throw new ORPCError("NOT_FOUND", {
+            message: "User settings not found",
+          })
+        }
+
+        const currentDisabled = existing[0].disabledDefaultBangs
+        const normalizedShortcut = input.shortcut.toLowerCase()
+
+        const newDisabled = currentDisabled.filter(
+          (s) => s !== normalizedShortcut,
+        )
+
+        const [updated] = await context.db
+          .update(userSettingsTable)
+          .set({
+            disabledDefaultBangs: newDisabled,
+            updatedAt: new Date(),
+          })
+          .where(eq(userSettingsTable.userId, context.session.id))
+          .returning()
+
+        return updated
+      } catch (error) {
+        if (error instanceof ORPCError) {
+          throw error
+        }
+        throw new ORPCError("INTERNAL_SERVER_ERROR", {
+          message: "Failed to enable default bang",
         })
       }
     }),

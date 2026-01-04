@@ -2,7 +2,9 @@
 
 import { useMemo, useState } from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { ExternalLinkIcon } from "lucide-react"
 
+import Link from "@/components/link"
 import SearchHistory from "@/components/search/search-history"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -376,6 +378,28 @@ const SettingsContent = () => {
             <Skeleton className="h-12 w-full" />
           </CardContent>
         </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Search Bangs</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <Field>
+              <FieldLabel>Custom search shortcuts</FieldLabel>
+              <FieldDescription>
+                Use bangs to quickly search specific sites. Type !gh react to
+                search GitHub, !w history to search Wikipedia, etc.
+              </FieldDescription>
+              <Link href="/settings/bangs">
+                <Button variant="outline" className="mt-2">
+                  <ExternalLinkIcon className="mr-2 h-4 w-4" />
+                  Manage Custom Bangs
+                </Button>
+              </Link>
+            </Field>
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader>
             <Skeleton className="h-6 w-48" />
@@ -407,6 +431,27 @@ const SettingsContent = () => {
               onCheckedChange={handleToggleOpenInNewTab}
               disabled={updateMutation.isPending}
             />
+          </Field>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Search Bangs</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <Field>
+            <FieldLabel>Custom search shortcuts</FieldLabel>
+            <FieldDescription>
+              Use bangs to quickly search specific sites. Type !gh react to
+              search GitHub, !w history to search Wikipedia, etc.
+            </FieldDescription>
+            <Link href="/settings/bangs">
+              <Button variant="outline" className="mt-2">
+                <ExternalLinkIcon className="mr-2 h-4 w-4" />
+                Manage Custom Bangs
+              </Button>
+            </Link>
           </Field>
         </CardContent>
       </Card>
