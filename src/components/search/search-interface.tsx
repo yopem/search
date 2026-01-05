@@ -87,6 +87,29 @@ const SearchInterface = ({
       return
     }
 
+    if (mode === "home") {
+      if (userSettings.defaultLanguage) {
+        void setLanguage(userSettings.defaultLanguage)
+      } else {
+        void setLanguage("")
+      }
+
+      if (userSettings.defaultTimeRange) {
+        void setTimeRange(userSettings.defaultTimeRange)
+      } else {
+        void setTimeRange("")
+      }
+
+      if (userSettings.defaultSafeSearch) {
+        void setSafeSearch(userSettings.defaultSafeSearch)
+      } else {
+        void setSafeSearch("2")
+      }
+
+      void setRegion("")
+      return
+    }
+
     const urlParams = new URLSearchParams(window.location.search)
     const hasLanguageParam = urlParams.has("lang")
     const hasTimeRangeParam = urlParams.has("timeRange")
@@ -103,7 +126,7 @@ const SearchInterface = ({
     if (!hasSafeSearchParam && userSettings.defaultSafeSearch) {
       void setSafeSearch(userSettings.defaultSafeSearch)
     }
-  }, [userSettings, setLanguage, setTimeRange, setSafeSearch])
+  }, [mode, userSettings, setLanguage, setTimeRange, setSafeSearch, setRegion])
 
   useEffect(() => {
     if (!userSettings || !session || category === "general") {

@@ -76,29 +76,68 @@ export const userSettingsRouter = {
     )
     .handler(async ({ input, context }) => {
       try {
+        const updateData: Record<string, unknown> = {
+          updatedAt: new Date(),
+        }
+
+        if (input.showSearchHistory !== undefined) {
+          updateData["showSearchHistory"] = input.showSearchHistory
+        }
+        if (input.openInNewTab !== undefined) {
+          updateData["openInNewTab"] = input.openInNewTab
+        }
+        if (input.showInfoboxPanels !== undefined) {
+          updateData["showInfoboxPanels"] = input.showInfoboxPanels
+        }
+        if (input.showCalculator !== undefined) {
+          updateData["showCalculator"] = input.showCalculator
+        }
+        if (input.showUnitConverter !== undefined) {
+          updateData["showUnitConverter"] = input.showUnitConverter
+        }
+        if (input.showWeather !== undefined) {
+          updateData["showWeather"] = input.showWeather
+        }
+        if (input.showImagesCategory !== undefined) {
+          updateData["showImagesCategory"] = input.showImagesCategory
+        }
+        if (input.showNewsCategory !== undefined) {
+          updateData["showNewsCategory"] = input.showNewsCategory
+        }
+        if (input.showVideosCategory !== undefined) {
+          updateData["showVideosCategory"] = input.showVideosCategory
+        }
+        if (input.showMusicCategory !== undefined) {
+          updateData["showMusicCategory"] = input.showMusicCategory
+        }
+        if (input.showMapCategory !== undefined) {
+          updateData["showMapCategory"] = input.showMapCategory
+        }
+        if (input.showScienceCategory !== undefined) {
+          updateData["showScienceCategory"] = input.showScienceCategory
+        }
+        if (input.showFilesCategory !== undefined) {
+          updateData["showFilesCategory"] = input.showFilesCategory
+        }
+        if (input.showSocialMediaCategory !== undefined) {
+          updateData["showSocialMediaCategory"] = input.showSocialMediaCategory
+        }
+        if (input.showTechCategory !== undefined) {
+          updateData["showTechCategory"] = input.showTechCategory
+        }
+        if (input.defaultLanguage !== undefined) {
+          updateData["defaultLanguage"] = input.defaultLanguage
+        }
+        if (input.defaultTimeRange !== undefined) {
+          updateData["defaultTimeRange"] = input.defaultTimeRange
+        }
+        if (input.defaultSafeSearch !== undefined) {
+          updateData["defaultSafeSearch"] = input.defaultSafeSearch
+        }
+
         const result = await context.db
           .update(userSettingsTable)
-          .set({
-            showSearchHistory: input.showSearchHistory,
-            openInNewTab: input.openInNewTab,
-            showInfoboxPanels: input.showInfoboxPanels,
-            showCalculator: input.showCalculator,
-            showUnitConverter: input.showUnitConverter,
-            showWeather: input.showWeather,
-            showImagesCategory: input.showImagesCategory,
-            showNewsCategory: input.showNewsCategory,
-            showVideosCategory: input.showVideosCategory,
-            showMusicCategory: input.showMusicCategory,
-            showMapCategory: input.showMapCategory,
-            showScienceCategory: input.showScienceCategory,
-            showFilesCategory: input.showFilesCategory,
-            showSocialMediaCategory: input.showSocialMediaCategory,
-            showTechCategory: input.showTechCategory,
-            defaultLanguage: input.defaultLanguage,
-            defaultTimeRange: input.defaultTimeRange,
-            defaultSafeSearch: input.defaultSafeSearch,
-            updatedAt: new Date(),
-          })
+          .set(updateData)
           .where(eq(userSettingsTable.userId, context.session.id))
           .returning()
 

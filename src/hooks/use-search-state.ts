@@ -96,6 +96,23 @@ export const useSearchState = ({ mode }: UseSearchStateProps) => {
     params.set("q", trimmedQuery)
     params.set("category", category)
     params.set("page", "1")
+
+    if (language) {
+      params.set("lang", language)
+    }
+
+    if (timeRange) {
+      params.set("timeRange", timeRange)
+    }
+
+    if (safeSearch) {
+      params.set("safeSearch", safeSearch)
+    }
+
+    if (region) {
+      params.set("region", region)
+    }
+
     router.push(`/search?${params.toString()}`)
   }
 
