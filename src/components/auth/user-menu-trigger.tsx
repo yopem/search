@@ -1,6 +1,6 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
+import { MenuTrigger } from "@/components/ui/menu"
 
 interface UserMenuTriggerProps {
   user: {
@@ -42,13 +42,13 @@ const UserMenuTrigger = ({ user }: UserMenuTriggerProps) => {
   const bgColor = getColorFromEmail(user.email)
 
   return (
-    <Button variant="ghost" className="size-8 rounded-full p-0">
+    <MenuTrigger className="size-8 cursor-pointer rounded-full p-0 transition-opacity outline-none hover:opacity-80">
       <div
         className={`flex size-full items-center justify-center rounded-full text-sm font-medium text-white ${bgColor}`}
       >
         {initial}
       </div>
-    </Button>
+    </MenuTrigger>
   )
 }
 
