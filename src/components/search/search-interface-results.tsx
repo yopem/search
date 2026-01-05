@@ -332,7 +332,9 @@ const SearchInterfaceResults = ({
           <div className="flex gap-8">
             <div
               className={
-                category === "images" ? "w-full" : "w-full max-w-162.5"
+                category === "images"
+                  ? "w-full"
+                  : "w-full max-w-140 xl:max-w-162.5"
               }
             >
               <SearchFilters
