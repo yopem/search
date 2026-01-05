@@ -132,6 +132,7 @@ const SearchResultsList = ({
                     key={globalIndex}
                     result={result}
                     onImageClick={() => onImageClick(globalIndex)}
+                    priority={globalIndex < 6}
                   />
                 )
               },

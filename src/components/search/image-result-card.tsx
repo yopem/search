@@ -14,9 +14,14 @@ interface ImageResult {
 interface ImageResultCardProps {
   result: ImageResult
   onImageClick?: () => void
+  priority?: boolean
 }
 
-const ImageResultCard = ({ result, onImageClick }: ImageResultCardProps) => {
+const ImageResultCard = ({
+  result,
+  onImageClick,
+  priority = false,
+}: ImageResultCardProps) => {
   const [imageError, setImageError] = useState(false)
   const [imageLoaded, setImageLoaded] = useState(false)
   const [aspectRatio, setAspectRatio] = useState(1)
@@ -60,7 +65,8 @@ const ImageResultCard = ({ result, onImageClick }: ImageResultCardProps) => {
         className={`object-cover transition-all duration-300 group-hover:scale-105 ${
           imageLoaded ? "opacity-100" : "opacity-0"
         }`}
-        loading="lazy"
+        loading={priority ? "eager" : "lazy"}
+        priority={priority}
         unoptimized
         onLoad={(e) => {
           const img = e.target as HTMLImageElement
