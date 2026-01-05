@@ -8,9 +8,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query"
 
-import InfoboxPanel, {
-  InfoboxPanelSkeleton,
-} from "@/components/search/infobox-panel"
+import InfoboxPanel from "@/components/search/infobox-panel"
 import RelatedSearches from "@/components/search/related-searches"
 import SearchEmpty from "@/components/search/search-empty"
 import SearchError from "@/components/search/search-error"
@@ -374,15 +372,6 @@ const SearchInterfaceResults = ({
               )}
 
               {!isDesktop &&
-                isLoading &&
-                category === "general" &&
-                (userSettings?.showInfoboxPanels ?? true) && (
-                  <div className="mb-4">
-                    <InfoboxPanelSkeleton />
-                  </div>
-                )}
-
-              {!isDesktop &&
                 !isLoading &&
                 !error &&
                 category === "general" &&
@@ -425,23 +414,14 @@ const SearchInterfaceResults = ({
                 </>
               )}
 
-              {!isDesktop &&
-                category !== "images" &&
-                !isLoading &&
-                !error &&
-                allResults.length > 0 && (
-                  <RelatedSearches query={initialQuery} category={category} />
-                )}
+              {!isDesktop && category !== "images" && !error && (
+                <RelatedSearches query={initialQuery} category={category} />
+              )}
             </div>
 
             {isDesktop && category !== "images" && (
               <div className="w-100 shrink-0">
                 <div className="sticky top-35 space-y-6">
-                  {isLoading &&
-                    category === "general" &&
-                    (userSettings?.showInfoboxPanels ?? true) && (
-                      <InfoboxPanelSkeleton />
-                    )}
                   {!isLoading &&
                     !error &&
                     category === "general" &&
@@ -457,7 +437,7 @@ const SearchInterfaceResults = ({
                         sourceUrl={data.pages[0].infobox.sourceUrl}
                       />
                     )}
-                  {!isLoading && !error && allResults.length > 0 && (
+                  {!error && (
                     <RelatedSearches query={initialQuery} category={category} />
                   )}
                 </div>

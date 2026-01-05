@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query"
 import { SearchIcon } from "lucide-react"
 
 import { Card } from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton"
 import { queryApi } from "@/lib/orpc/query"
 
 interface RelatedSearchesProps {
@@ -13,7 +14,7 @@ interface RelatedSearchesProps {
 }
 
 const RelatedSearches = ({ query, category }: RelatedSearchesProps) => {
-  const { data: suggestions = [] } = useQuery({
+  const { data: suggestions = [], isLoading } = useQuery({
     ...queryApi.search.autocomplete.queryOptions({
       input: { query },
     }),
@@ -23,6 +24,24 @@ const RelatedSearches = ({ query, category }: RelatedSearchesProps) => {
   const filtered = suggestions
     .filter((s: string) => s.toLowerCase() !== query.toLowerCase())
     .slice(0, 6)
+
+  if (isLoading) {
+    return (
+      <div className="mt-8">
+        <Skeleton className="mb-2 h-5 w-32" />
+        <div className="flex flex-col gap-2">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Card key={i} className="p-3">
+              <div className="flex items-center gap-2">
+                <Skeleton className="h-4 w-4 shrink-0" />
+                <Skeleton className="h-4 w-full sm:w-48" />
+              </div>
+            </Card>
+          ))}
+        </div>
+      </div>
+    )
+  }
 
   if (filtered.length === 0) {
     return null

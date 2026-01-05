@@ -49,13 +49,33 @@ export const InfoboxPanelSkeleton = () => {
   return (
     <Card className="w-full">
       <CardHeader className="pb-3">
-        <Skeleton className="h-6 w-3/4" />
+        <Skeleton className="h-7 w-3/4" />
       </CardHeader>
       <CardContent className="space-y-3">
-        <Skeleton className="h-48 w-full" />
-        <Skeleton className="h-4 w-full" />
-        <Skeleton className="h-4 w-full" />
-        <Skeleton className="h-4 w-2/3" />
+        <Skeleton className="aspect-square w-full rounded-lg" />
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-2/3" />
+        </div>
+        <div className="space-y-1.5">
+          <div className="flex gap-2">
+            <Skeleton className="h-4 w-20" />
+            <Skeleton className="h-4 w-32" />
+          </div>
+          <div className="flex gap-2">
+            <Skeleton className="h-4 w-20" />
+            <Skeleton className="h-4 w-24" />
+          </div>
+          <div className="flex gap-2">
+            <Skeleton className="h-4 w-20" />
+            <Skeleton className="h-4 w-28" />
+          </div>
+        </div>
+        <div className="flex items-center gap-1">
+          <Skeleton className="h-3 w-20" />
+          <Skeleton className="h-3 w-3" />
+        </div>
       </CardContent>
     </Card>
   )
