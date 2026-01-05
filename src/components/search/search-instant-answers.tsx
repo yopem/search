@@ -1,8 +1,21 @@
 "use client"
 
-import CalculatorWidget from "@/components/search/instant-answer-calculator"
-import UnitConverterWidget from "@/components/search/instant-answer-unit-converter"
-import WeatherWidget from "@/components/search/instant-answer-weather"
+import dynamic from "next/dynamic"
+
+const CalculatorWidget = dynamic(
+  () => import("@/components/search/instant-answer-calculator"),
+  { ssr: false },
+)
+
+const UnitConverterWidget = dynamic(
+  () => import("@/components/search/instant-answer-unit-converter"),
+  { ssr: false },
+)
+
+const WeatherWidget = dynamic(
+  () => import("@/components/search/instant-answer-weather"),
+  { ssr: false },
+)
 
 interface InstantAnswer {
   type: string

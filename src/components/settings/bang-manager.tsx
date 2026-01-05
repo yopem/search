@@ -1,6 +1,7 @@
 "use client"
 
 import { useMemo, useState } from "react"
+import dynamic from "next/dynamic"
 import { useQuery } from "@tanstack/react-query"
 import {
   DownloadIcon,
@@ -10,9 +11,6 @@ import {
   UploadIcon,
 } from "lucide-react"
 
-import BangConfirmDialog from "@/components/settings/bang-confirm-dialog"
-import BangFormDialog from "@/components/settings/bang-form-dialog"
-import BangImportDialog from "@/components/settings/bang-import-dialog"
 import BangItemCard from "@/components/settings/bang-item-card"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -20,6 +18,21 @@ import { Input } from "@/components/ui/input"
 import { useBangMutations } from "@/hooks/use-bang-mutations"
 import { useMergedBangs, type MergedBang } from "@/hooks/use-merged-bangs"
 import { queryApi } from "@/lib/orpc/query"
+
+const BangConfirmDialog = dynamic(
+  () => import("@/components/settings/bang-confirm-dialog"),
+  { ssr: false },
+)
+
+const BangFormDialog = dynamic(
+  () => import("@/components/settings/bang-form-dialog"),
+  { ssr: false },
+)
+
+const BangImportDialog = dynamic(
+  () => import("@/components/settings/bang-import-dialog"),
+  { ssr: false },
+)
 
 const BangManager = () => {
   const [searchQuery, setSearchQuery] = useState("")

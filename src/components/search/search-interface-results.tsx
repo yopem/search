@@ -1,13 +1,13 @@
 "use client"
 
 import { useEffect, useRef } from "react"
+import dynamic from "next/dynamic"
 import {
   useInfiniteQuery,
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query"
 
-import ImageViewer from "@/components/search/image-viewer"
 import InfoboxPanel, {
   InfoboxPanelSkeleton,
 } from "@/components/search/infobox-panel"
@@ -25,6 +25,10 @@ import { useInfiniteScroll } from "@/hooks/use-infinite-scroll"
 import { useMediaQuery } from "@/hooks/use-media-query"
 import { queryApi } from "@/lib/orpc/query"
 import { detectLanguage } from "@/lib/utils/language-detection"
+
+const ImageViewer = dynamic(() => import("@/components/search/image-viewer"), {
+  ssr: false,
+})
 
 interface SearchInterfaceResultsProps {
   initialQuery: string
