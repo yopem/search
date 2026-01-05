@@ -1,6 +1,6 @@
 "use client"
 
-import SearchFilterButton from "@/components/search/search-filter-button"
+import { Button } from "@/components/ui/button"
 import {
   Menu,
   MenuPopup,
@@ -22,11 +22,15 @@ const SearchFilterMenu = ({
   options,
   onValueChange,
 }: SearchFilterMenuProps) => {
+  const selectedOption = options.find((opt) => opt.value === value)
+
   return (
     <Menu>
       <MenuTrigger
         render={
-          <SearchFilterButton label={label} value={value} options={options} />
+          <Button variant="outline" size="sm">
+            {selectedOption?.label ?? label}
+          </Button>
         }
       />
       <MenuPopup>
