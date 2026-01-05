@@ -415,7 +415,14 @@ const SearchInterfaceResults = ({
               )}
 
               {!isDesktop && category !== "images" && !error && (
-                <RelatedSearches query={initialQuery} category={category} />
+                <RelatedSearches
+                  query={initialQuery}
+                  category={category}
+                  timeRange={timeRange}
+                  region={region}
+                  safeSearch={safeSearch}
+                  language={language}
+                />
               )}
             </div>
 
@@ -438,7 +445,14 @@ const SearchInterfaceResults = ({
                       />
                     )}
                   {!error && (
-                    <RelatedSearches query={initialQuery} category={category} />
+                    <RelatedSearches
+                      query={initialQuery}
+                      category={category}
+                      timeRange={timeRange}
+                      region={region}
+                      safeSearch={safeSearch}
+                      language={language}
+                    />
                   )}
                 </div>
               </div>

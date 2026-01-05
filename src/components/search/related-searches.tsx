@@ -11,9 +11,20 @@ import { queryApi } from "@/lib/orpc/query"
 interface RelatedSearchesProps {
   query: string
   category: string
+  timeRange?: string
+  region?: string
+  safeSearch?: string
+  language?: string
 }
 
-const RelatedSearches = ({ query, category }: RelatedSearchesProps) => {
+const RelatedSearches = ({
+  query,
+  category,
+  timeRange,
+  region,
+  safeSearch,
+  language,
+}: RelatedSearchesProps) => {
   const { data: suggestions = [], isLoading } = useQuery({
     ...queryApi.search.autocomplete.queryOptions({
       input: { query },
@@ -24,6 +35,31 @@ const RelatedSearches = ({ query, category }: RelatedSearchesProps) => {
   const filtered = suggestions
     .filter((s: string) => s.toLowerCase() !== query.toLowerCase())
     .slice(0, 6)
+
+  const buildSearchUrl = (suggestion: string) => {
+    const params = new URLSearchParams()
+    params.set("q", suggestion)
+    params.set("category", category)
+    params.set("page", "1")
+
+    if (language) {
+      params.set("lang", language)
+    }
+
+    if (timeRange) {
+      params.set("timeRange", timeRange)
+    }
+
+    if (safeSearch) {
+      params.set("safeSearch", safeSearch)
+    }
+
+    if (region) {
+      params.set("region", region)
+    }
+
+    return `/search?${params.toString()}`
+  }
 
   if (isLoading) {
     return (
@@ -56,7 +92,7 @@ const RelatedSearches = ({ query, category }: RelatedSearchesProps) => {
         {filtered.map((suggestion) => (
           <Link
             key={suggestion}
-            href={`/search?q=${encodeURIComponent(suggestion)}&category=${category}`}
+            href={buildSearchUrl(suggestion)}
             prefetch={false}
           >
             <Card className="hover:bg-accent/50 p-3 transition-colors">
