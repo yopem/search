@@ -7,6 +7,7 @@ import UserMenu from "@/components/auth/user-menu"
 import Logo from "@/components/logo"
 import SearchAutocomplete from "@/components/search/search-autocomplete"
 import { Button } from "@/components/ui/button"
+import YopemServicesMenu from "@/components/yopem-services-menu"
 
 interface SearchHeaderNavigationProps {
   query: string
@@ -73,6 +74,7 @@ const SearchHeaderNavigation = ({
             <span className="sr-only">Login</span>
           </Button>
         )}
+        <YopemServicesMenu />
       </div>
     </div>
   )

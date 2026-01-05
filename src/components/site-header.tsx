@@ -7,6 +7,7 @@ import { LogInIcon } from "lucide-react"
 import UserMenu from "@/components/auth/user-menu"
 import Logo from "@/components/logo"
 import { Button } from "@/components/ui/button"
+import YopemServicesMenu from "@/components/yopem-services-menu"
 
 interface SiteHeaderProps {
   session: {
@@ -47,6 +48,7 @@ const SiteHeader = ({ session }: SiteHeaderProps) => {
                 <span className="sr-only">Login</span>
               </Button>
             )}
+            <YopemServicesMenu />
           </div>
         </div>
       </header>
@@ -80,6 +82,7 @@ const SiteHeader = ({ session }: SiteHeaderProps) => {
               <span className="sr-only">Login</span>
             </Button>
           )}
+          <YopemServicesMenu />
         </div>
       </div>
     </header>
