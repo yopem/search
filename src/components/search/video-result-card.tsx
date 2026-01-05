@@ -11,6 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { useOpenGraphImage } from "@/hooks/use-opengraph-image"
 
 interface VideoResult {
   title: string
@@ -19,6 +20,8 @@ interface VideoResult {
   publishedDate?: string
   duration?: string
   thumbnail?: string
+  thumbnail_src?: string
+  img_src?: string
 }
 
 const VideoResultCard = ({
@@ -29,14 +32,57 @@ const VideoResultCard = ({
   openInNewTab?: boolean
 }) => {
   const [faviconError, setFaviconError] = useState(false)
+  const [thumbnailError, setThumbnailError] = useState(false)
+  const [thumbnailLoaded, setThumbnailLoaded] = useState(false)
 
   const displayUrl = new URL(result.url).hostname.replace("www.", "")
   const faviconUrl = `https://www.google.com/s2/favicons?domain=${displayUrl}&sz=32`
 
+  const rawThumbnailUrl =
+    result.img_src ?? result.thumbnail_src ?? result.thumbnail ?? ""
+  const searxngThumbnailUrl = rawThumbnailUrl.startsWith("//")
+    ? `https:${rawThumbnailUrl}`
+    : rawThumbnailUrl
+
+  const { data: ogImageUrl } = useOpenGraphImage(
+    result.url,
+    !searxngThumbnailUrl,
+  )
+
+  const thumbnailUrl = searxngThumbnailUrl
+    ? searxngThumbnailUrl
+    : (ogImageUrl ?? "")
+  const hasThumbnail = !!thumbnailUrl && !thumbnailError
+
   return (
     <Card className="hover:bg-accent/50 transition-colors">
       <CardHeader className="p-3">
-        <div className="flex items-start justify-between gap-2">
+        <div className="flex items-start justify-between gap-3">
+          {hasThumbnail && (
+            <div className="relative aspect-video w-40 shrink-0 overflow-hidden rounded-md">
+              <Image
+                src={thumbnailUrl}
+                alt={result.title}
+                fill
+                sizes="160px"
+                className={`object-cover transition-opacity duration-300 ${
+                  thumbnailLoaded ? "opacity-100" : "opacity-0"
+                }`}
+                loading="lazy"
+                unoptimized
+                onLoad={() => setThumbnailLoaded(true)}
+                onError={() => setThumbnailError(true)}
+              />
+              {!thumbnailLoaded && (
+                <div className="bg-muted absolute inset-0 flex items-center justify-center">
+                  <div className="bg-muted-foreground/20 h-4 w-4 animate-pulse rounded-full" />
+                </div>
+              )}
+              <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                <PlayIcon className="h-8 w-8 text-white drop-shadow-lg" />
+              </div>
+            </div>
+          )}
           <div className="flex-1 space-y-1">
             <a
               href={result.url}

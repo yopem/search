@@ -659,4 +659,85 @@ export const searchRouter = {
       })
     }
   }),
+
+  getOpenGraphImage: publicProcedure
+    .input(z.object({ url: z.string().url() }))
+    .handler(async ({ input }) => {
+      try {
+        const urlObj = new URL(input.url)
+
+        if (
+          urlObj.hostname === "www.youtube.com" ||
+          urlObj.hostname === "youtube.com" ||
+          urlObj.hostname === "m.youtube.com"
+        ) {
+          const videoIdMatch = /[?&]v=([^&]+)/.exec(input.url)
+          if (videoIdMatch?.[1]) {
+            return `https://img.youtube.com/vi/${videoIdMatch[1]}/hqdefault.jpg`
+          }
+        }
+
+        if (urlObj.hostname === "youtu.be") {
+          const videoIdMatch = /youtu\.be\/([^?]+)/.exec(input.url)
+          if (videoIdMatch?.[1]) {
+            return `https://img.youtube.com/vi/${videoIdMatch[1]}/hqdefault.jpg`
+          }
+        }
+
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 5000)
+
+        const response = await fetch(input.url, {
+          signal: controller.signal,
+          headers: {
+            "User-Agent":
+              "Mozilla/5.0 (compatible; YopemBot/1.0; +https://yopem.com)",
+          },
+        })
+
+        clearTimeout(timeoutId)
+
+        if (!response.ok) {
+          return null
+        }
+
+        const html = await response.text()
+
+        const ogImageRegex =
+          /<meta\s+(?:property=["']og:image["']\s+content=["']([^"']+)["']|content=["']([^"']+)["']\s+property=["']og:image["'])/i
+        const ogImageMatch = ogImageRegex.exec(html)
+
+        if (ogImageMatch) {
+          let imageUrl = ogImageMatch[1] || ogImageMatch[2]
+
+          if (imageUrl.startsWith("//")) {
+            imageUrl = `https:${imageUrl}`
+          } else if (imageUrl.startsWith("/")) {
+            imageUrl = `${urlObj.protocol}//${urlObj.host}${imageUrl}`
+          }
+
+          return imageUrl
+        }
+
+        const twitterImageRegex =
+          /<meta\s+(?:name=["']twitter:image["']\s+content=["']([^"']+)["']|content=["']([^"']+)["']\s+name=["']twitter:image["'])/i
+        const twitterImageMatch = twitterImageRegex.exec(html)
+
+        if (twitterImageMatch) {
+          let imageUrl = twitterImageMatch[1] || twitterImageMatch[2]
+
+          if (imageUrl.startsWith("//")) {
+            imageUrl = `https:${imageUrl}`
+          } else if (imageUrl.startsWith("/")) {
+            imageUrl = `${urlObj.protocol}//${urlObj.host}${imageUrl}`
+          }
+
+          return imageUrl
+        }
+
+        return null
+      } catch {
+        return null
+      }
+    }),
 }
